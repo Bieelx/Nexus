@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "965049742008",
+    "project_id": "sec4youapp",
+    "storage_bucket": "sec4youapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:965049742008:android:964d2f69911b1905ab7a4d",
+        "android_client_info": {
+          "package_name": "com.example.chatbot_sec4you"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpWstCnkV8LSrUVa4AnWhWC6er-_XzZJ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

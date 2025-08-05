@@ -1,0 +1,437 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.chatbot_sec4you"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="35" />
+10    <!--
+11         The INTERNET permission is required for development. Specifically,
+12         the Flutter tool needs it to communicate with the running application
+13         to allow setting breakpoints, to provide hot reload, etc.
+14    -->
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:5:5-66
+15-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:5:22-64
+16    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+16-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:6:5-76
+16-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:6:22-74
+17
+18    <queries>
+18-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:40:5-45:15
+19        <intent>
+19-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:41:9-44:18
+20            <action android:name="android.intent.action.PROCESS_TEXT" />
+20-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:42:13-72
+20-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:42:21-70
+21
+22            <data android:mimeType="text/plain" />
+22-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:43:13-50
+22-->/Users/gabrielgramacho/flutter_chatbot/chatbot_sec4you/android/app/src/main/AndroidManifest.xml:43:19-48
+23        </intent>
+24    </queries>
+25
+26    <uses-permission android:name="android.permission.WAKE_LOCK" />
+26-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:5-68
+26-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:22-65
+27    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Required by older versions of Google Play services to create IID tokens -->
+27-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:5-79
+27-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:22-76
+28    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+28-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:26:5-82
+28-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:26:22-79
+29
+30    <permission
+30-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+31        android:name="com.example.chatbot_sec4you.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+31-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+32        android:protectionLevel="signature" />
+32-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+33
+34    <uses-permission android:name="com.example.chatbot_sec4you.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+34-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+34-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+35
+36    <application
+37        android:name="android.app.Application"
+38        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+38-->[androidx.core:core:1.13.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/2dbe8e63029deaf54881c284678591ad/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+39        android:debuggable="true"
+40        android:extractNativeLibs="true"
+41        android:icon="@mipmap/ic_launcher"
+42        android:label="chatbot_sec4you" >
+43        <activity
+44            android:name="com.example.chatbot_sec4you.MainActivity"
+45            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+46            android:exported="true"
+47            android:hardwareAccelerated="true"
+48            android:launchMode="singleTop"
+49            android:taskAffinity=""
+50            android:theme="@style/LaunchTheme"
+51            android:windowSoftInputMode="adjustResize" >
+52            <meta-data
+53                android:name="com.google.firebase.messaging.default_notification_channel_id"
+54                android:value="default_channel" />
+55            <meta-data
+56                android:name="io.flutter.embedding.android.NormalTheme"
+57                android:resource="@style/NormalTheme" />
+58
+59            <intent-filter>
+60                <action android:name="android.intent.action.MAIN" />
+61
+62                <category android:name="android.intent.category.LAUNCHER" />
+63            </intent-filter>
+64        </activity>
+65
+66        <meta-data
+67            android:name="flutterEmbedding"
+68            android:value="2" />
+69
+70        <service
+70-->[:cloud_firestore] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.7/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:9-12:19
+71            android:name="com.google.firebase.components.ComponentDiscoveryService"
+71-->[:cloud_firestore] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.7/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:18-89
+72            android:directBootAware="true"
+72-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:32:13-43
+73            android:exported="false" >
+73-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:16:13-37
+74            <meta-data
+74-->[:cloud_firestore] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.7/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:13-11:85
+75                android:name="com.google.firebase.components:io.flutter.plugins.firebase.firestore.FlutterFirebaseFirestoreRegistrar"
+75-->[:cloud_firestore] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.7/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:17-134
+76                android:value="com.google.firebase.components.ComponentRegistrar" />
+76-->[:cloud_firestore] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/cloud_firestore-5.6.7/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:17-82
+77            <meta-data
+77-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:36:13-38:85
+78                android:name="com.google.firebase.components:io.flutter.plugins.firebase.messaging.FlutterFirebaseAppRegistrar"
+78-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:37:17-128
+79                android:value="com.google.firebase.components.ComponentRegistrar" />
+79-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:38:17-82
+80            <meta-data
+80-->[:firebase_core] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_core-3.13.0/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:13-11:85
+81                android:name="com.google.firebase.components:io.flutter.plugins.firebase.core.FlutterFirebaseCoreRegistrar"
+81-->[:firebase_core] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_core-3.13.0/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:17-124
+82                android:value="com.google.firebase.components.ComponentRegistrar" />
+82-->[:firebase_core] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_core-3.13.0/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:17-82
+83            <meta-data
+83-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:17:13-19:85
+84                android:name="com.google.firebase.components:com.google.firebase.firestore.FirebaseFirestoreKtxRegistrar"
+84-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:18:17-122
+85                android:value="com.google.firebase.components.ComponentRegistrar" />
+85-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:19:17-82
+86            <meta-data
+86-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:20:13-22:85
+87                android:name="com.google.firebase.components:com.google.firebase.firestore.FirestoreRegistrar"
+87-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:21:17-111
+88                android:value="com.google.firebase.components.ComponentRegistrar" />
+88-->[com.google.firebase:firebase-firestore:25.1.3] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f3a9664dc997f61cf48b1010eb3923e7/transformed/jetified-firebase-firestore-25.1.3/AndroidManifest.xml:22:17-82
+89            <meta-data
+89-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:57:13-59:85
+90                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
+90-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:58:17-122
+91                android:value="com.google.firebase.components.ComponentRegistrar" />
+91-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:59:17-82
+92            <meta-data
+92-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:60:13-62:85
+93                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+93-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:61:17-119
+94                android:value="com.google.firebase.components.ComponentRegistrar" />
+94-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:62:17-82
+95            <meta-data
+95-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:15:13-17:85
+96                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
+96-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:16:17-130
+97                android:value="com.google.firebase.components.ComponentRegistrar" />
+97-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:17:17-82
+98            <meta-data
+98-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:18:13-20:85
+99                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+99-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:19:17-127
+100                android:value="com.google.firebase.components.ComponentRegistrar" />
+100-->[com.google.firebase:firebase-installations:18.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9540ad8fadbb57a768059c83d77347ff/transformed/jetified-firebase-installations-18.0.0/AndroidManifest.xml:20:17-82
+101            <meta-data
+101-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/0d4f5179a477552b5cf90fd0a018dc2a/transformed/jetified-firebase-common-ktx-21.0.0/AndroidManifest.xml:12:13-14:85
+102                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+102-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/0d4f5179a477552b5cf90fd0a018dc2a/transformed/jetified-firebase-common-ktx-21.0.0/AndroidManifest.xml:13:17-116
+103                android:value="com.google.firebase.components.ComponentRegistrar" />
+103-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/0d4f5179a477552b5cf90fd0a018dc2a/transformed/jetified-firebase-common-ktx-21.0.0/AndroidManifest.xml:14:17-82
+104            <meta-data
+104-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:35:13-37:85
+105                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+105-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:36:17-109
+106                android:value="com.google.firebase.components.ComponentRegistrar" />
+106-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:37:17-82
+107            <meta-data
+107-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f1725feb5e4e7c7c55446d163a074067/transformed/jetified-firebase-datatransport-18.2.0/AndroidManifest.xml:25:13-27:85
+108                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
+108-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f1725feb5e4e7c7c55446d163a074067/transformed/jetified-firebase-datatransport-18.2.0/AndroidManifest.xml:26:17-115
+109                android:value="com.google.firebase.components.ComponentRegistrar" />
+109-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/f1725feb5e4e7c7c55446d163a074067/transformed/jetified-firebase-datatransport-18.2.0/AndroidManifest.xml:27:17-82
+110        </service>
+111        <service
+111-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:9-17:72
+112            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingBackgroundService"
+112-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:13-107
+113            android:exported="false"
+113-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:13-37
+114            android:permission="android.permission.BIND_JOB_SERVICE" />
+114-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:17:13-69
+115        <service
+115-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:18:9-24:19
+116            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
+116-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:13-97
+117            android:exported="false" >
+117-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:20:13-37
+118            <intent-filter>
+118-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:21:13-23:29
+119                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+119-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:17-78
+119-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:25-75
+120            </intent-filter>
+121        </service>
+122
+123        <receiver
+123-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:26:9-33:20
+124            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingReceiver"
+124-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:27:13-98
+125            android:exported="true"
+125-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:13-36
+126            android:permission="com.google.android.c2dm.permission.SEND" >
+126-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:29:13-73
+127            <intent-filter>
+127-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:30:13-32:29
+128                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+128-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:31:17-81
+128-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:31:25-78
+129            </intent-filter>
+130        </receiver>
+131
+132        <provider
+132-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:41:9-45:38
+133            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingInitProvider"
+133-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:42:13-102
+134            android:authorities="com.example.chatbot_sec4you.flutterfirebasemessaginginitprovider"
+134-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:43:13-88
+135            android:exported="false"
+135-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:44:13-37
+136            android:initOrder="99" />
+136-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:45:13-35
+137
+138        <receiver
+138-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:29:9-40:20
+139            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+139-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:30:13-78
+140            android:exported="true"
+140-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:31:13-36
+141            android:permission="com.google.android.c2dm.permission.SEND" >
+141-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:32:13-73
+142            <intent-filter>
+142-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:30:13-32:29
+143                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+143-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:31:17-81
+143-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:31:25-78
+144            </intent-filter>
+145
+146            <meta-data
+146-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:37:13-39:40
+147                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
+147-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:38:17-92
+148                android:value="true" />
+148-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:39:17-37
+149        </receiver>
+150        <!--
+151             FirebaseMessagingService performs security checks at runtime,
+152             but set to not exported to explicitly avoid allowing another app to call it.
+153        -->
+154        <service
+154-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:46:9-53:19
+155            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+155-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:47:13-82
+156            android:directBootAware="true"
+156-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:48:13-43
+157            android:exported="false" >
+157-->[com.google.firebase:firebase-messaging:24.1.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cb187c5de36a534a77be83ebe69a82d0/transformed/jetified-firebase-messaging-24.1.1/AndroidManifest.xml:49:13-37
+158            <intent-filter android:priority="-500" >
+158-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:21:13-23:29
+159                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+159-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:17-78
+159-->[:firebase_messaging] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/firebase_messaging-15.2.5/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:25-75
+160            </intent-filter>
+161        </service>
+162
+163        <provider
+163-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:9-17:20
+164            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
+164-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:13-82
+165            android:authorities="com.example.chatbot_sec4you.flutter.image_provider"
+165-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:13-74
+166            android:exported="false"
+166-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:13-37
+167            android:grantUriPermissions="true" >
+167-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:13:13-47
+168            <meta-data
+168-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:14:13-16:75
+169                android:name="android.support.FILE_PROVIDER_PATHS"
+169-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:15:17-67
+170                android:resource="@xml/flutter_image_picker_file_paths" />
+170-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:16:17-72
+171        </provider> <!-- Trigger Google Play services to install the backported photo picker module. -->
+172        <service
+172-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:19:9-31:19
+173            android:name="com.google.android.gms.metadata.ModuleDependencies"
+173-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:20:13-78
+174            android:enabled="false"
+174-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:21:13-36
+175            android:exported="false" >
+175-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:22:13-37
+176            <intent-filter>
+176-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:24:13-26:29
+177                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+177-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:17-94
+177-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:25:25-91
+178            </intent-filter>
+179
+180            <meta-data
+180-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:28:13-30:36
+181                android:name="photopicker_activity:0:required"
+181-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:29:17-63
+182                android:value="" />
+182-->[:image_picker_android] /Users/gabrielgramacho/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:30:17-33
+183        </service>
+184
+185        <provider
+185-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:23:9-28:39
+186            android:name="com.google.firebase.provider.FirebaseInitProvider"
+186-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:24:13-77
+187            android:authorities="com.example.chatbot_sec4you.firebaseinitprovider"
+187-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:25:13-72
+188            android:directBootAware="true"
+188-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:26:13-43
+189            android:exported="false"
+189-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:27:13-37
+190            android:initOrder="100" />
+190-->[com.google.firebase:firebase-common:21.0.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/5c81f12a601dadc496729a95d58e70b6/transformed/jetified-firebase-common-21.0.0/AndroidManifest.xml:28:13-36
+191
+192        <activity
+192-->[com.google.android.gms:play-services-base:18.1.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/27e37a79c9c4d33fcca60192c866b471/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:9-22:45
+193            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+193-->[com.google.android.gms:play-services-base:18.1.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/27e37a79c9c4d33fcca60192c866b471/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:19-85
+194            android:exported="false"
+194-->[com.google.android.gms:play-services-base:18.1.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/27e37a79c9c4d33fcca60192c866b471/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:22:19-43
+195            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+195-->[com.google.android.gms:play-services-base:18.1.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/27e37a79c9c4d33fcca60192c866b471/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:21:19-78
+196
+197        <provider
+197-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+198            android:name="androidx.startup.InitializationProvider"
+198-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:25:13-67
+199            android:authorities="com.example.chatbot_sec4you.androidx-startup"
+199-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:26:13-68
+200            android:exported="false" >
+200-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:27:13-37
+201            <meta-data
+201-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+202                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+202-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+203                android:value="androidx.startup" />
+203-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/a6e388607f2619494897a2aea3d1aa7b/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+204            <meta-data
+204-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+205                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+205-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+206                android:value="androidx.startup" />
+206-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+207        </provider>
+208
+209        <uses-library
+209-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+210            android:name="androidx.window.extensions"
+210-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+211            android:required="false" />
+211-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+212        <uses-library
+212-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+213            android:name="androidx.window.sidecar"
+213-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+214            android:required="false" />
+214-->[androidx.window:window:1.2.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/4ec50829fc00d0443bf7e9f4846dcdf3/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+215
+216        <meta-data
+216-->[com.google.android.gms:play-services-basement:18.3.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cf6a882050757f8a0db54a0bee24896c/transformed/jetified-play-services-basement-18.3.0/AndroidManifest.xml:21:9-23:69
+217            android:name="com.google.android.gms.version"
+217-->[com.google.android.gms:play-services-basement:18.3.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cf6a882050757f8a0db54a0bee24896c/transformed/jetified-play-services-basement-18.3.0/AndroidManifest.xml:22:13-58
+218            android:value="@integer/google_play_services_version" />
+218-->[com.google.android.gms:play-services-basement:18.3.0] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/cf6a882050757f8a0db54a0bee24896c/transformed/jetified-play-services-basement-18.3.0/AndroidManifest.xml:23:13-66
+219
+220        <receiver
+220-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+221            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+221-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+222            android:directBootAware="false"
+222-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+223            android:enabled="true"
+223-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+224            android:exported="true"
+224-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+225            android:permission="android.permission.DUMP" >
+225-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+226            <intent-filter>
+226-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+227                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+227-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+227-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+228            </intent-filter>
+229            <intent-filter>
+229-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+230                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+230-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+230-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+231            </intent-filter>
+232            <intent-filter>
+232-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+233                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+233-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+233-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+234            </intent-filter>
+235            <intent-filter>
+235-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+236                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+236-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+236-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9fc22c212dd52e9d1b4ffc87afbb4edf/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+237            </intent-filter>
+238        </receiver>
+239
+240        <service
+240-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:28:9-34:19
+241            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+241-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:29:13-103
+242            android:exported="false" >
+242-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:30:13-37
+243            <meta-data
+243-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:31:13-33:39
+244                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+244-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:32:17-94
+245                android:value="cct" />
+245-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/9cc0623351eec18360f147784aa4ad97/transformed/jetified-transport-backend-cct-3.1.9/AndroidManifest.xml:33:17-36
+246        </service>
+247        <service
+247-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:26:9-30:19
+248            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+248-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:27:13-117
+249            android:exported="false"
+249-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:28:13-37
+250            android:permission="android.permission.BIND_JOB_SERVICE" >
+250-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:29:13-69
+251        </service>
+252
+253        <receiver
+253-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:32:9-34:40
+254            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+254-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:33:13-132
+255            android:exported="false" />
+255-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/gabrielgramacho/.gradle/caches/8.10.2/transforms/d709183b8ee5376926884d82ae2bf3d8/transformed/jetified-transport-runtime-3.1.9/AndroidManifest.xml:34:13-37
+256    </application>
+257
+258</manifest>
