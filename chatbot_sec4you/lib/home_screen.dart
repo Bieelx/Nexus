@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'security_alerts_screen_real.dart';
+import 'widgets/mini_map_widget.dart';
+import 'service/user_location_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,6 +12,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
+
 class _HomeScreenState extends State<HomeScreen> {
   String? firstName;
 
@@ -17,6 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadFirstNameFromFirestore();
+    _updateUserLocation();
+  }
+  
+  Future<void> _updateUserLocation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await UserLocationService.updateUserLocation(user.uid);
+    }
   }
 
   Future<void> _loadFirstNameFromFirestore() async {
@@ -178,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                  MiniMapWidget(),
                   const SizedBox(height: 24),
-                  // BOTÃO DE TESTE PARA CONFIRMAR FUNCIONALIDADE
                   Container(
                     width: double.infinity,
                     child: ElevatedButton.icon(

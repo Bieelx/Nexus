@@ -41,10 +41,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB7qUna1WAqo7DhB55Hm06d12JS4cgZszg',
+    apiKey: 'AIzaSyC1yZJ6m7eSSBJNez_5uBec9-KiiYu2M3o',
     appId: '1:965049742008:web:f534a13140a8c164ab7a4d',
     messagingSenderId: '965049742008',
-    projectId: 'sec4youapp',
+    projectId: 'sec4u-6b6f8',
     authDomain: 'sec4youapp.firebaseapp.com',
     storageBucket: 'sec4youapp.firebasestorage.app',
     measurementId: 'G-DC92DZ4V6L',
@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyDpWstCnkV8LSrUVa4AnWhWC6er-_XzZJ8',
     appId: '1:965049742008:android:964d2f69911b1905ab7a4d',
     messagingSenderId: '965049742008',
-    projectId: 'sec4youapp',
+    projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4youapp.firebasestorage.app',
   );
 
@@ -62,7 +62,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyCSK8KIu2dFHNyYumj1yNDU5jHEkVGzt6Y',
     appId: '1:965049742008:ios:a79243cc0ec2b894ab7a4d',
     messagingSenderId: '965049742008',
-    projectId: 'sec4youapp',
+    projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4youapp.firebasestorage.app',
     iosBundleId: 'com.example.chatbotSec4you',
   );
@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyCSK8KIu2dFHNyYumj1yNDU5jHEkVGzt6Y',
     appId: '1:965049742008:ios:a79243cc0ec2b894ab7a4d',
     messagingSenderId: '965049742008',
-    projectId: 'sec4youapp',
+    projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4youapp.firebasestorage.app',
     iosBundleId: 'com.example.chatbotSec4you',
   );
@@ -80,7 +80,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyB7qUna1WAqo7DhB55Hm06d12JS4cgZszg',
     appId: '1:965049742008:web:0161beee8fb2c2f1ab7a4d',
     messagingSenderId: '965049742008',
-    projectId: 'sec4youapp',
+    projectId: 'sec4u-6b6f8',
     authDomain: 'sec4youapp.firebaseapp.com',
     storageBucket: 'sec4youapp.firebasestorage.app',
     measurementId: 'G-WR67G3CLCF',

@@ -9,6 +9,7 @@ import 'leak_check_screen.dart';
 import 'boards_screen.dart';
 import 'users_map_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'firebase_options.dart';
 
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
@@ -30,7 +31,9 @@ class AuthCheck extends StatelessWidget {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     ChangeNotifierProvider(
       create: (_) => AuthService(),

@@ -22,38 +22,46 @@ class AuthService with ChangeNotifier {
     });
   }
 
-  Future<void> registrar(String email, String senha, String nome, String sobrenome) async {
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: senha,
-      );
+Future<void> registrar(String email, String senha, String nome, String sobrenome) async {
+  print("INICIANDO REGISTRO de $email");
+  try {
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: senha,
+    );
+    print("USUÁRIO CRIADO NO AUTH: ${userCredential.user?.uid}");
 
-      // Salva no Firestore
-      await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).set({
-        'nome': nome,
-        'sobrenome': sobrenome,
-        'email': email,
-        'criadoEm': FieldValue.serverTimestamp(),
-      });
+    // Salva no Firestore
+    await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).set({
+      'nome': nome,
+      'sobrenome': sobrenome,
+      'email': email,
+      'criadoEm': FieldValue.serverTimestamp(),
+    });
+    print("SALVO NO FIRESTORE!");
 
-      // Atualiza o displayName do usuário autenticado
-      await userCredential.user?.updateDisplayName(nome);
+    // Atualiza o displayName do usuário autenticado
+    await userCredential.user?.updateDisplayName(nome);
 
-      // (Opcional) Atualiza o usuário localmente
-      await userCredential.user?.reload();
-      usuario = _auth.currentUser;
-      notifyListeners();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        throw AuthException('A senha é muito fraca!');
-      } else if (e.code == 'email-already-in-use') {
-        throw AuthException('Este email já está cadastrado');
-      } else {
-        throw AuthException('Erro ao registrar: ${e.message}');
-      }
+    // (Opcional) Atualiza o usuário localmente
+    await userCredential.user?.reload();
+    usuario = _auth.currentUser;
+    print("USUÁRIO LOCAL ATUALIZADO!");
+    notifyListeners();
+  } on FirebaseAuthException catch (e) {
+    print('ERRO FirebaseAuthException: ${e.code} ${e.message}');
+    if (e.code == 'weak-password') {
+      throw AuthException('A senha é muito fraca!');
+    } else if (e.code == 'email-already-in-use') {
+      throw AuthException('Este email já está cadastrado');
+    } else {
+      throw AuthException('Erro ao registrar: ${e.message}');
     }
+  } catch (e) {
+    print('ERRO DESCONHECIDO NO REGISTRO: $e');
+    throw AuthException('Erro inesperado ao registrar: $e');
   }
+}
 
   Future<void> login(String email, String senha) async {
     try {

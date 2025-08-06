@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyCSK8KIu2dFHNyYumj1yNDU5jHEkVGzt6Y</string>
+	<string>AIzaSyC1m231rFoJgNUNjHocNUCSgWsTabQSIHM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>965049742008</string>
+	<string>480594485086</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.chatbotSec4you</string>
 	<key>PROJECT_ID</key>
-	<string>sec4youapp</string>
+	<string>sec4u-6b6f8</string>
 	<key>STORAGE_BUCKET</key>
-	<string>sec4youapp.firebasestorage.app</string>
+	<string>sec4u-6b6f8.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:965049742008:ios:a79243cc0ec2b894ab7a4d</string>
+	<string>1:480594485086:ios:61c8e2deb300664c8c39cf</string>
 </dict>
 </plist>
