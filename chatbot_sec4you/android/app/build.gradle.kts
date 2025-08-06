@@ -1,12 +1,12 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // O Flutter Gradle Plugin deve ser aplicado após os plugins Android e Kotlin.
+    id("com.google.gms.google-services") version "4.4.3" apply false
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    namespace = "com.example.chatbot_sec4you"
+    namespace = "com.sec4you.securityconnect"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -21,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.chatbot_sec4you"
+        applicationId = "com.sec4you.securityconnect"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -42,6 +42,8 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 // Esta linha DEVE ficar no final do arquivo:
