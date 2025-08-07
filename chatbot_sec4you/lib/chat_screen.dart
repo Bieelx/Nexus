@@ -236,42 +236,73 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemBuilder: (context, index) => buildMessage(messages[index]),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              color: const Color(0xFF0D0D0D),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      enabled: !isLoading,
-                      style: const TextStyle(color: Color(0xFFFAF9F6)),
-                      decoration: InputDecoration(
-                        hintText: isLoading ? "Aguarde a resposta..." : "Digite sua mensagem...",
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        filled: true,
-                        fillColor: const Color(0xFF1A1A1A),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      onSubmitted: (_) => sendMessage(_controller.text),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : () => sendMessage(_controller.text),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7F2AB1),
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(12),
-                    ),
-                    child: const Icon(Icons.send, color: Color(0xFFFAF9F6)),
-                  ),
-                ],
+Container(
+  width: double.infinity,
+  height: 56,
+  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+  color: const Color(0xFF0D0D0D), // Fundo do chat (não o da barra)
+  child: Container(
+    height: 46,
+    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+    decoration: ShapeDecoration(
+      color: const Color(0xFF393939),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+      ),
+      shadows: [
+        BoxShadow(
+          color: Color(0x3F000000),
+          blurRadius: 4,
+          offset: Offset(0, 4),
+          spreadRadius: 0,
+        )
+      ],
+    ),
+    child: Row(
+      children: [
+        // Input real, estilizado igual Figma
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            enabled: !isLoading,
+            style: const TextStyle(
+              color: Color(0xFFA259FF),
+              fontSize: 15,
+              fontFamily: 'JetBrains Mono',
+              fontWeight: FontWeight.w400,
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
+              hintStyle: const TextStyle(
+                color: Color(0xFFA259FF),
+                fontSize: 15,
+                fontFamily: 'JetBrains Mono',
+                fontWeight: FontWeight.w400,
               ),
-            )
+              contentPadding: const EdgeInsets.only(bottom: 4),
+            ),
+            onSubmitted: (_) => sendMessage(_controller.text),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Botão enviar circular roxo
+        GestureDetector(
+          onTap: isLoading ? null : () => sendMessage(_controller.text),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFFA259FF),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.send, color: Colors.white, size: 22),
+          ),
+        ),
+      ],
+    ),
+  ),
+)
           ],
         ),
       ),

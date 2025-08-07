@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'core/theme/app_theme.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,88 +12,117 @@ class CustomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    // Responsivo: ajusta margens proporcionalmente
+    final width = MediaQuery.of(context).size.width;
+    final horizontalPadding = width <= 440 ? 18.0 : width * 0.04;
+    final bottomPadding = 46.84; // Ajuste se necessário para iOS/Android
 
-    return Container(
-      height: 80,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+    const navBarBg = Color(0xBF393939); // #393939 75%
+    const selectedCircle = Color(0xFF242526);
+    const selectedPurple = Color(0xFFA259FF);
+    const unselectedIcon = Color(0xFFD9D9D9);
+
+    final icons = [
+      Icons.home,
+      Icons.menu_book_rounded,
+      Icons.security,
+      Icons.forum,
+    ];
+    final labels = ['Home', 'Cursos', 'Vazamentos', 'Fórum'];
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: horizontalPadding,
+        right: horizontalPadding,
+        bottom: bottomPadding,
       ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedFontSize: 0,
-        unselectedFontSize: 0,
-        type: BottomNavigationBarType.fixed,
-        iconSize: 36,
-        currentIndex: currentIndex,
-        onTap: onTap,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home,
-                color: currentIndex == 0
-                    ? colorScheme.primary
-                    : colorScheme.onSurface),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book,
-                color: currentIndex == 1
-                    ? colorScheme.primary
-                    : colorScheme.onSurface),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Transform.translate(
-              offset: const Offset(0, -20),
-              child: Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: colorScheme.background,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: currentIndex == 2
-                        ? colorScheme.primary
-                        : colorScheme.outline,
-                    width: 4,
-                  ),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    '../assets/luizinho.png',
-                    width: 60,
-                    height: 60,
-                  ),
-                ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // NavBar principal
+          Expanded(
+            child: Container(
+              height: 56.16,
+              decoration: BoxDecoration(
+                color: navBarBg,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(icons.length, (i) {
+                  final selected = currentIndex == i;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => onTap(i),
+                      child: Container(
+                        height: 56.16,
+                        decoration: selected
+                            ? BoxDecoration(
+                                color: selectedCircle,
+                                borderRadius: BorderRadius.circular(28),
+                              )
+                            : null,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              icons[i],
+                              color: selected ? selectedPurple : unselectedIcon,
+                              size: 28,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              labels[i],
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: selected ? selectedPurple : unselectedIcon,
+                                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                                fontFamily: 'JetBrainsMono',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ),
             ),
-            label: '',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.security,
-                color: currentIndex == 3
-                    ? colorScheme.primary
-                    : colorScheme.onSurface),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person,
-                color: currentIndex == 4
-                    ? colorScheme.primary
-                    : colorScheme.onSurface),
-            label: '',
+          // Espaço entre NavBar e "Luizinho"
+          const SizedBox(width: 38.84),
+          // "Luizinho" botão: use a imagem real se quiser
+          GestureDetector(
+            onTap: () => onTap(4),
+            child: Container(
+              width: 56.16,
+              height: 56.16,
+              decoration: BoxDecoration(
+                color: currentIndex == 4 ? selectedCircle : navBarBg,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: /* Substitua abaixo por Image.asset se quiser a imagem do Luizinho! */
+                    Icon(
+                      Icons.person,
+                      size: 32,
+                      color: currentIndex == 4 ? selectedPurple : Colors.white,
+                    ),
+                // Exemplo para imagem:
+                // Image.asset(
+                //   'assets/luizinho.png',
+                //   width: 36,
+                //   height: 36,
+                // ),
+              ),
+            ),
           ),
         ],
       ),

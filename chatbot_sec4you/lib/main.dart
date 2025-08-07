@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'service/auth_service.dart';
+
 import 'login_page.dart';
 import 'home_screen.dart';
 import 'chat_screen.dart';
 import 'leak_check_screen.dart';
 import 'boards_screen.dart';
 import 'users_map_screen.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
+
+import 'navbar.dart'; 
 
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
@@ -88,15 +92,10 @@ class _MainNavigationState extends State<MainNavigation> {
   String _autoMessage = '';
 
   void _onTabTapped(int index) async {
-    if (index == 5) {
-      // Se for a aba de logout
-      await Provider.of<AuthService>(context, listen: false).logout();
-    } else {
       setState(() {
         _selectedIndex = index;
         _autoMessage = '';
       });
-    }
   }
 
   void _changeTab(int index, String autoMsg) {
@@ -114,41 +113,15 @@ class _MainNavigationState extends State<MainNavigation> {
       LeakCheckerScreen(changeTab: _changeTab),
       BoardsScreen(),
       UsersMapScreen(),
-      Container(), // Aba vazia para logout
+
     ];
 
-    return Scaffold(
-      body: screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.house),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.security),
-            label: 'Vazamentos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.forum),
-            label: 'Fórum',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: 'Sair',
-          ),
-        ],
-      ),
-    );
+return Scaffold(
+  body: screens[_selectedIndex],
+  bottomNavigationBar: CustomNavBar(
+    currentIndex: _selectedIndex,
+    onTap: _onTabTapped,
+  ),
+);
   }
 }

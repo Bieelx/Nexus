@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import './widgets/leak_widget.dart';
 
 class LeakCheckerScreen extends StatefulWidget {
   final Function(int, String) changeTab;
@@ -294,119 +295,51 @@ class _LeakCheckerScreenState extends State<LeakCheckerScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
-      appBar: AppBar(
-        title: const Text(
-          '<Verificar Dados./>',
-          style: TextStyle(
-            color: Color(0xFFFAF9F6),
-            fontWeight: FontWeight.bold,
+@override
+Widget build(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
+
+  // Proporcional ao design base
+  final topSpacing = screenHeight * 0.093;     // 83/892
+  final leftPadding = screenWidth * 0.039;     // 16/412
+
+  return Scaffold(
+    backgroundColor: const Color(0xFF0D0D0D),
+    body: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: topSpacing),
+          Padding(
+            padding: EdgeInsets.only(left: leftPadding),
+            child: const Text(
+              '<Vazamento./>',
+              style: TextStyle(
+                color: Color(0xFFA259FF),
+                fontSize: 22,
+                fontFamily: 'JetBrains Mono',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
-        ),
-        backgroundColor: const Color(0xFF1A1A1A),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Color(0xFFFAF9F6)),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            DropdownButton<String>(
-              value: selectedType,
-              dropdownColor: const Color(0xFF1A1A1A),
-              iconEnabledColor: Colors.white,
-              items: <String>['Email', 'Senha', 'Telefone', 'Site'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(
-                    value,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                );
-              }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  selectedType = newValue!;
-                  resultMessage = '';
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _dataController,
-              enabled: !isLoading,
-              style: const TextStyle(color: Color(0xFFFAF9F6)),
-              decoration: InputDecoration(
-                prefixIcon: Icon(
-                  selectedType == 'Email'
-                      ? Icons.email
-                      : selectedType == 'Senha'
-                          ? Icons.lock
-                          : selectedType == 'Telefone'
-                              ? Icons.phone
-                              : Icons.language,
-                  color: Colors.white,
-                ),
-                hintText: selectedType == 'Email'
-                    ? 'Digite seu email'
-                    : selectedType == 'Senha'
-                        ? 'Digite sua senha'
-                        : selectedType == 'Telefone'
-                            ? 'Digite seu telefone'
-                            : 'Digite o site',
-                hintStyle: const TextStyle(color: Colors.white54),
-                filled: true,
-                fillColor: const Color(0xFF1A1A1A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              obscureText: selectedType == 'Senha',
-              keyboardType: selectedType == 'Telefone'
-                  ? TextInputType.phone
-                  : TextInputType.text,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : verifyData,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7F2AB1),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              ),
-              child: isLoading
-                  ? const CircularProgressIndicator(color: Color(0xFFFAF9F6))
-                  : const Text('Verificar', style: TextStyle(color: Color(0xFFFAF9F6))),
-            ),
-            const SizedBox(height: 20),
-            if (resultMessage.isNotEmpty)
-              Text(
-                resultMessage,
-                style: const TextStyle(
-                  color: Color(0xFFFAF9F6),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        color: const Color(0xFF1A1A1A),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: const Text(
-          'Desenvolvido por Gabriel Gramacho, Mikael Palmeira, Gabriel Araujo, Gustavo Teodoro e Kauã Granata • 2025',
-          style: TextStyle(
-            color: Color(0xFFFAF9F6),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
+          // Resto da tela:
+          LeakVerificationCard(
+            controller: _dataController,
+            selectedType: selectedType,
+            onDropdownChanged: (val) {
+              setState(() {
+                selectedType = val!;
+                resultMessage = '';
+              });
+            },
+            isLoading: isLoading,
+            onVerify: verifyData,
+            resultMessage: resultMessage,
           ),
-          textAlign: TextAlign.center,
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

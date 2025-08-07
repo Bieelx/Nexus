@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'security_alerts_screen_real.dart';
-import 'widgets/mini_map_widget.dart';
+import 'widgets/homeScreen/mini_map_widget.dart';
+import 'widgets/homeScreen/map_calendar_switch.dart';
 import 'service/user_location_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,10 +13,9 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
-
 class _HomeScreenState extends State<HomeScreen> {
   String? firstName;
+  bool _isMapSelected = true; // Adicionado para controlar o switch
 
   @override
   void initState() {
@@ -190,8 +190,42 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  MiniMapWidget(),
                   const SizedBox(height: 24),
+
+                  // *** SWITCH "MAPA / CALENDÁRIO" ***
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 0), 
+                      child: MapCalendarSwitch(
+                        isMapSelected: _isMapSelected,
+                        onChanged: (selected) {
+                          setState(() => _isMapSelected = selected);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // *** CONTEÚDO CONDICIONAL ***
+                  _isMapSelected
+                      ? MiniMapWidget()
+                      : Container(
+                          height: 180,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.13),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            'Calendário (em breve)',
+                            style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                          ),
+                        ),
+
+                  const SizedBox(height: 24),
+
                   Container(
                     width: double.infinity,
                     child: ElevatedButton.icon(
