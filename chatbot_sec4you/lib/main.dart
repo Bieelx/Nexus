@@ -14,6 +14,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 import 'navbar.dart'; 
+import 'core/theme/app_colors.dart';
 
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
@@ -55,7 +56,7 @@ class Sec4YouApp extends StatelessWidget {
       title: 'Sec4You',
       theme: ThemeData(
         useMaterial3: false,
-        scaffoldBackgroundColor: const Color(0xFF0D0D0D),
+        scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1A1A1A),
           iconTheme: IconThemeData(color: Color(0xFFFAF9F6)),

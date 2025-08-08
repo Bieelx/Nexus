@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './core/theme/app_colors.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -17,10 +18,7 @@ class CustomNavBar extends StatelessWidget {
     final horizontalPadding = width <= 440 ? 18.0 : width * 0.04;
     final bottomPadding = 46.84; // Ajuste se necessário para iOS/Android
 
-    const navBarBg = Color(0xBF393939); // #393939 75%
     const selectedCircle = Color(0xFF242526);
-    const selectedPurple = Color(0xFFA259FF);
-    const unselectedIcon = Color(0xFFD9D9D9);
 
     final icons = [
       Icons.home,
@@ -44,7 +42,7 @@ class CustomNavBar extends StatelessWidget {
             child: Container(
               height: 56.16,
               decoration: BoxDecoration(
-                color: navBarBg,
+                color: AppColors.box.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(28),
               ),
               child: Row(
@@ -67,7 +65,7 @@ class CustomNavBar extends StatelessWidget {
                           children: [
                             Icon(
                               icons[i],
-                              color: selected ? selectedPurple : unselectedIcon,
+                              color: selected ? AppColors.primaryPurple : AppColors.white,
                               size: 28,
                             ),
                             const SizedBox(height: 2),
@@ -75,7 +73,7 @@ class CustomNavBar extends StatelessWidget {
                               labels[i],
                               style: TextStyle(
                                 fontSize: 12,
-                                color: selected ? selectedPurple : unselectedIcon,
+                                color: selected ? AppColors.primaryPurple : AppColors.white,
                                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                                 fontFamily: 'JetBrainsMono',
                               ),
@@ -98,7 +96,7 @@ class CustomNavBar extends StatelessWidget {
               width: 56.16,
               height: 56.16,
               decoration: BoxDecoration(
-                color: currentIndex == 4 ? selectedCircle : navBarBg,
+                color: currentIndex == 4 ? AppColors.background : AppColors.box,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -109,11 +107,11 @@ class CustomNavBar extends StatelessWidget {
                 ],
               ),
               child: Center(
-                child: /* Substitua abaixo por Image.asset se quiser a imagem do Luizinho! */
+                child:
                     Icon(
                       Icons.person,
                       size: 32,
-                      color: currentIndex == 4 ? selectedPurple : Colors.white,
+                      color: currentIndex == 4 ? AppColors.primaryPurple : AppColors.white,
                     ),
                 // Exemplo para imagem:
                 // Image.asset(

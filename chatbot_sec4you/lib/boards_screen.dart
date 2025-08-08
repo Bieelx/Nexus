@@ -81,19 +81,6 @@ class _BoardsScreenState extends State<BoardsScreen> {
           },
         )).toList(),
       ),
-      bottomNavigationBar: Container(
-        color: const Color(0xFF1A1A1A),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: const Text(
-          'Desenvolvido por Gabriel Gramacho, Mikael Palmeira, Gabriel Araujo, Gustavo Teodoro e Kauã Granata • 2025',
-          style: TextStyle(
-            color: Color(0xFFFAF9F6),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
     );
   }
 }

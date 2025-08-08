@@ -1,9 +1,15 @@
+//Cores do app
+import '../core/theme/app_colors.dart';
+
+//widgets
+import 'widgets/homeScreen/news_feed_widget.dart';
+import 'widgets/homeScreen/map_calendar_switch.dart';
+import 'widgets/homeScreen/notification_card.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'security_alerts_screen_real.dart';
-import 'widgets/homeScreen/mini_map_widget.dart';
-import 'widgets/homeScreen/map_calendar_switch.dart';
 import 'service/user_location_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -56,12 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const purple = Color(0xFF9F45FF);
-    const bg = Color(0xFF0D0D0D);
-    const darkCard = Color(0xFF1A1A1A);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: AppColors.background,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: firstName == null
@@ -72,11 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 32),
                   Row(
                     children: [
-                      const Icon(Icons.play_arrow, color: purple),
+                      const Icon(Icons.play_arrow, color: AppColors.primaryPurple),
                       const SizedBox(width: 8),
                       Text(
                         'Bem-vindo de volta, $firstName.',
-                        style: const TextStyle(color: purple, fontSize: 18),
+                        style: const TextStyle(color: AppColors.primaryPurple, fontSize: 18),
                       ),
                     ],
                   ),
@@ -85,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: darkCard,
+                      color: AppColors.box,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -101,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Text(
                                     'Continuar curso?',
                                     style: TextStyle(
-                                      color: purple,
+                                      color: AppColors.primaryPurple,
                                       fontSize: 18,
                                       fontFamily: 'JetBrainsMono',
                                     ),
@@ -109,21 +112,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(height: 4),
                                   Text(
                                     'Fire Wall\nMódulo 1 - atividade 5',
-                                    style: TextStyle(color: Colors.white70),
+                                    style: TextStyle(color: AppColors.white),
                                   ),
                                 ],
                               ),
                             ),
                             Icon(
                               Icons.local_fire_department,
-                              color: purple,
+                              color: AppColors.primaryPurple,
                               size: 48,
                             ),
                           ],
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.play_arrow, color: purple),
+                            const Icon(Icons.play_arrow, color: AppColors.primaryPurple),
                             const SizedBox(width: 12),
                             Expanded(
                               child: SizedBox(
@@ -131,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: LinearProgressIndicator(
                                   value: 0.5,
                                   backgroundColor: const Color.fromARGB(255,231,230,230,),
-                                  valueColor: AlwaysStoppedAnimation<Color>(purple),
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
                                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                                 ),
                               ),
@@ -145,21 +148,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   // CARDS DE NOTIFICAÇÕES E ALERTAS
                   Row(
                     children: [
-                      Expanded(
-                        child: CardInfo(
-                          title: 'Você tem',
-                          value: '9+',
-                          subtitle: 'Notificações',
-                          color: purple,
-                        ),
-                      ),
+                     Expanded(
+                      child: NotificationCard(count: '9+'),
+                    ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: CardInfo(
                           title: 'Você tem',
                           value: '1',
                           subtitle: 'Alerta de segurança',
-                          color: purple,
+                          color: AppColors.primaryPurple,
                           onTap: () {
                             print('🔥 CARD CLICADO! Iniciando navegação...'); 
                             try {
@@ -209,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // *** CONTEÚDO CONDICIONAL ***
                   _isMapSelected
-                      ? MiniMapWidget()
+                      ? const NewsFeedWidget(query: 'cybersecurity')
                       : Container(
                           height: 180,
                           width: double.infinity,
@@ -226,26 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 24),
 
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        print('✅ BOTÃO DE TESTE FUNCIONANDO!');
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => SecurityAlertsScreenReal(),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.security),
-                      label: Text('🔧 TESTE: Abrir Alertas de Segurança'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: purple,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
+
                   const SizedBox(height: 24),
                 ],
               ),
@@ -286,8 +265,6 @@ class CardInfo extends StatelessWidget {
             onTap!();
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1A1A1A),
-            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: color.withOpacity(0.8), width: 3),
@@ -333,7 +310,7 @@ class CardInfo extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white)),
+            Text(title, style: const TextStyle(color: AppColors.white)),
             const SizedBox(height: 4),
             Text(
               value,
@@ -343,7 +320,7 @@ class CardInfo extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(subtitle, style: const TextStyle(color: Colors.white70)),
+            Text(subtitle, style: const TextStyle(color: AppColors.white)),
           ],
         ),
       );
