@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/theme/app_colors.dart';
 
 
 class ChatScreen extends StatefulWidget {
@@ -161,112 +162,137 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildMessage(Map<String, String> msg) {
-    bool isUser = msg['sender'] == "user";
-    String? tone = msg['tone'] ?? 'neutral';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.start : MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (isUser)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: CircleAvatar(
-                backgroundColor: const Color(0xFF1A1A1A),
-                child: const Icon(Icons.person, color: Color(0xFFFAF9F6)),
-              ),
-            ),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isUser ? const Color(0xFF1A1A1A) : const Color(0xFF232323),
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(18),
-                  topRight: const Radius.circular(18),
-                  bottomLeft: isUser ? const Radius.circular(0) : const Radius.circular(18),
-                  bottomRight: isUser ? const Radius.circular(18) : const Radius.circular(0),
-                ),
-              ),
-              child: Text(
-                msg['text'] ?? '',
-                style: const TextStyle(color: Color(0xFFFAF9F6), fontSize: 16),
-              ),
+Widget buildMessage(Map<String, String> msg) {
+  final isBot = (msg['sender'] ?? '') != 'user'; // AI à esquerda
+  final tone = (msg['tone'] ?? 'neutro');
+
+
+  // largura máx. ~ 74% da tela (ajusta responsivo)
+  final maxBubbleWidth = MediaQuery.of(context).size.width * 0.74;
+
+  final avatar = CircleAvatar(
+    backgroundColor: isBot ? const Color(0xFF232323) : const Color(0xFF1A1A1A),
+    backgroundImage: isBot ? AssetImage(getBotAvatar(tone)) : null,
+    child: isBot ? null : const Icon(Icons.person, color: Color(0xFFFAF9F6)),
+    radius: 18,
+  );
+
+  final bubble = ConstrainedBox(
+    constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+    child: Stack(
+      children: [
+        // bolha
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.chatBotBubble,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(18),
+              topRight: const Radius.circular(18),
+              bottomLeft: isBot ? const Radius.circular(0) : const Radius.circular(18),
+              bottomRight: isBot ? const Radius.circular(18) : const Radius.circular(0),
             ),
           ),
-          if (!isUser)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: CircleAvatar(
-                backgroundColor: const Color(0xFF232323),
-                backgroundImage: AssetImage(getBotAvatar(tone)),
-                radius: 20,
-              ),
+          child: Text(
+            msg['text'] ?? '',
+            style: TextStyle(color: AppColors.chatTextOnBot, fontSize: 15.5),
+          ),
+        ),
+        // rabinho
+        Positioned(
+          bottom: 0,
+          left: isBot ? 0 : null,
+          right: isBot ? null : 0,
+          child: CustomPaint(
+            painter: _BubbleTailPainter(
+              color: AppColors.chatBotBubble,
+              isLeft: isBot,
             ),
-        ],
-      ),
-    );
-  }
+            size: const Size(10, 12),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  return Row(
+    mainAxisAlignment: isBot ? MainAxisAlignment.start : MainAxisAlignment.end,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      if (isBot) ...[
+        avatar,
+        const SizedBox(width: 8),
+        bubble,
+      ] else ...[
+        bubble,
+        const SizedBox(width: 8),
+        avatar,
+      ]
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        titleSpacing: 16, // 16px da borda esquerda
+        iconTheme: const IconThemeData(color: AppColors.white),
         title: const Text(
-          "<Chat Bot./>",
+          '<Chat Bot./>',
           style: TextStyle(
-            color: Color(0xFFFAF9F6),
-            fontWeight: FontWeight.bold,
+            color: AppColors.primaryPurple,
+            fontSize: 22,
+            fontFamily: 'JetBrainsMono',
+            fontWeight: FontWeight.w400,
           ),
         ),
-        backgroundColor: const Color(0xFF1A1A1A),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Color(0xFFFAF9F6)),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 controller: _scrollController,
                 itemCount: messages.length,
                 itemBuilder: (context, index) => buildMessage(messages[index]),
+                separatorBuilder: (_, __) => const SizedBox(height: 40), // 40px entre bolhas
               ),
             ),
 Container(
   width: double.infinity,
   height: 56,
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-  color: const Color(0xFF0D0D0D), // Fundo do chat (não o da barra)
+  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  color: AppColors.background,
   child: Container(
     height: 46,
     padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
     decoration: ShapeDecoration(
-      color: const Color(0xFF393939),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-      ),
+      color: AppColors.box,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       shadows: [
         BoxShadow(
-          color: Color(0x3F000000),
+          color: const Color(0x3F000000),
           blurRadius: 4,
-          offset: Offset(0, 4),
+          offset: const Offset(0, 4),
           spreadRadius: 0,
         )
       ],
     ),
     child: Row(
       children: [
-        // Input real, estilizado igual Figma
         Expanded(
           child: TextField(
             controller: _controller,
             enabled: !isLoading,
+            textAlignVertical: TextAlignVertical.bottom,
             style: const TextStyle(
-              color: Color(0xFFA259FF),
+              color: AppColors.primaryPurple,
               fontSize: 15,
               fontFamily: 'JetBrains Mono',
               fontWeight: FontWeight.w400,
@@ -275,25 +301,25 @@ Container(
               border: InputBorder.none,
               hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
               hintStyle: const TextStyle(
-                color: Color(0xFFA259FF),
+                color: AppColors.primaryPurple,
                 fontSize: 15,
                 fontFamily: 'JetBrains Mono',
                 fontWeight: FontWeight.w400,
               ),
-              contentPadding: const EdgeInsets.only(bottom: 4),
+              isDense: true,
+              contentPadding: const EdgeInsets.only(left: 16, right: 14, bottom: 10, top: 0),
             ),
             onSubmitted: (_) => sendMessage(_controller.text),
           ),
         ),
         const SizedBox(width: 10),
-        // Botão enviar circular roxo
         GestureDetector(
           onTap: isLoading ? null : () => sendMessage(_controller.text),
           child: Container(
             width: 38,
             height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFFA259FF),
+            decoration: const BoxDecoration(
+              color: AppColors.primaryPurple,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.send, color: Colors.white, size: 22),
@@ -302,21 +328,8 @@ Container(
       ],
     ),
   ),
-)
+),
           ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        color: const Color(0xFF1A1A1A),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: const Text(
-          'Desenvolvido por Gabriel Gramacho, Mikael Palmeira, Gabriel Araujo, Gustavo Teodoro e Kauã Granata • 2025',
-          style: TextStyle(
-            color: Color(0xFFFAF9F6),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -326,4 +339,32 @@ Container(
 // Extensão para pegar as últimas N mensagens
 extension TakeLastExtension<E> on List<E> {
   Iterable<E> takeLast(int n) => skip(length - n < 0 ? 0 : length - n);
+}
+
+class _BubbleTailPainter extends CustomPainter {
+  final Color color;
+  final bool isLeft;
+  const _BubbleTailPainter({required this.color, required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = Path();
+    if (isLeft) {
+      // pequeno triângulo apontando para a esquerda
+      path.moveTo(0, size.height);
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, 0);
+    } else {
+      // pequeno triângulo apontando para a direita
+      path.moveTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.lineTo(size.width, 0);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
