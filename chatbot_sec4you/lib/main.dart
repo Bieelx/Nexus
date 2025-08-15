@@ -15,6 +15,7 @@ import 'firebase_options.dart';
 
 import 'navbar.dart'; 
 import 'core/theme/app_colors.dart';
+import 'widgets/gradient_background.dart';
 
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
@@ -55,26 +56,33 @@ class Sec4YouApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sec4You',
       theme: ThemeData(
-        useMaterial3: false,
-        scaffoldBackgroundColor: AppColors.background,
+        fontFamily: 'Poppins',
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.transparent,
+
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1A1A1A),
           iconTheme: IconThemeData(color: Color(0xFFFAF9F6)),
           titleTextStyle: TextStyle(
             color: Color(0xFFFAF9F6),
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            fontFamily: 'JetBrainsMono',
+            fontFamily: 'Poppins',
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF1A1A1A),
           selectedItemColor: Color(0xFF7F2AB1),
           unselectedItemColor: Color(0xFFFAF9F6),
           type: BottomNavigationBarType.fixed,
         ),
-        fontFamily: 'JetBrainsMono',
       ),
+
+      // ⬇️ aqui embrulhamos TODAS as rotas com o gradiente
+      builder: (context, child) {
+        return GradientBackground(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+
       home: const AuthCheck(),
       debugShowCheckedModeBanner: false,
     );

@@ -163,81 +163,68 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 Widget buildMessage(Map<String, String> msg) {
-  final isBot = (msg['sender'] ?? '') != 'user'; // AI à esquerda
+  // IA à esquerda, usuário à direita
+  final isBot = (msg['sender'] ?? '') != 'user';
   final tone = (msg['tone'] ?? 'neutro');
 
 
-  // largura máx. ~ 74% da tela (ajusta responsivo)
-  final maxBubbleWidth = MediaQuery.of(context).size.width * 0.74;
+  // largura máx. responsiva (~78% da tela)
+  final maxBubbleWidth = MediaQuery.of(context).size.width * 0.78;
 
-  final avatar = CircleAvatar(
-    backgroundColor: isBot ? const Color(0xFF232323) : const Color(0xFF1A1A1A),
+
+  final Widget avatar = CircleAvatar(
+    radius: 20,
+    backgroundColor: isBot ? Colors.transparent : const Color(0xFF678EE6),
     backgroundImage: isBot ? AssetImage(getBotAvatar(tone)) : null,
-    child: isBot ? null : const Icon(Icons.person, color: Color(0xFFFAF9F6)),
-    radius: 18,
+    child: isBot ? null : const Icon(Icons.person, color: Colors.white),
   );
 
-  final bubble = ConstrainedBox(
+
+  final Widget bubble = ConstrainedBox(
     constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-    child: Stack(
-      children: [
-        // bolha
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.chatBotBubble,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(18),
-              topRight: const Radius.circular(18),
-              bottomLeft: isBot ? const Radius.circular(0) : const Radius.circular(18),
-              bottomRight: isBot ? const Radius.circular(18) : const Radius.circular(0),
+      child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    decoration: isBot
+        ? BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment(0.08, 0.68),
+              end: Alignment(0.59, 0.69),
+              colors: [Color(0xFF6638B6), Color(0xFF634A9E)],
             ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF6C52BB), width: 1),
+          )
+        : BoxDecoration(
+            color: const Color(0xAD3251A3),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF678EE6), width: 1),
           ),
-          child: Text(
-            msg['text'] ?? '',
-            style: TextStyle(color: AppColors.chatTextOnBot, fontSize: 15.5),
-          ),
-        ),
-        // rabinho
-        Positioned(
-          bottom: 0,
-          left: isBot ? 0 : null,
-          right: isBot ? null : 0,
-          child: CustomPaint(
-            painter: _BubbleTailPainter(
-              color: AppColors.chatBotBubble,
-              isLeft: isBot,
-            ),
-            size: const Size(10, 12),
-          ),
-        ),
-      ],
+    child: Text(
+      msg['text'] ?? '',
+      style: TextStyle(
+        color: isBot ? const Color(0xFFAE85E5) : const Color(0xFF9AB5EF),
+        fontSize: 12,
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w600,
+        height: 1.83,
+      ),
     ),
+      )
   );
 
   return Row(
     mainAxisAlignment: isBot ? MainAxisAlignment.start : MainAxisAlignment.end,
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      if (isBot) ...[
-        avatar,
-        const SizedBox(width: 8),
-        bubble,
-      ] else ...[
-        bubble,
-        const SizedBox(width: 8),
-        avatar,
-      ]
-    ],
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: isBot
+        ? [avatar, const SizedBox(width: 12), bubble]
+        : [bubble, const SizedBox(width: 12), avatar],
   );
 }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         titleSpacing: 16, // 16px da borda esquerda
@@ -265,70 +252,83 @@ Widget buildMessage(Map<String, String> msg) {
               ),
             ),
 Container(
-  width: double.infinity,
-  height: 56,
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  color: AppColors.background,
-  child: Container(
-    height: 46,
-    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
-    decoration: ShapeDecoration(
-      color: AppColors.box,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-      shadows: [
-        BoxShadow(
-          color: const Color(0x3F000000),
-          blurRadius: 4,
-          offset: const Offset(0, 4),
-          spreadRadius: 0,
-        )
-      ],
-    ),
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+    color: Colors.transparent,
     child: Row(
       children: [
+        // Input pill (left)
         Expanded(
-          child: TextField(
-            controller: _controller,
-            enabled: !isLoading,
-            textAlignVertical: TextAlignVertical.bottom,
-            style: const TextStyle(
-              color: AppColors.primaryPurple,
-              fontSize: 15,
-              fontFamily: 'JetBrains Mono',
-              fontWeight: FontWeight.w400,
-            ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
-              hintStyle: const TextStyle(
-                color: AppColors.primaryPurple,
-                fontSize: 15,
-                fontFamily: 'JetBrains Mono',
-                fontWeight: FontWeight.w400,
+          child: Container(
+            height: 43,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: ShapeDecoration(
+              color: const Color(0xB2515767),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(width: 1, color: Color(0xFF7884C4)),
+                borderRadius: BorderRadius.circular(16),
               ),
-              isDense: true,
-              contentPadding: const EdgeInsets.only(left: 16, right: 14, bottom: 10, top: 0),
             ),
-            onSubmitted: (_) => sendMessage(_controller.text),
+            child: TextField(
+              controller: _controller,
+              enabled: !isLoading,
+              textAlignVertical: TextAlignVertical.bottom,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                height: 1.83,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
+                hintStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  height: 1.83,
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.only(left: 4, right: 4, bottom: 10, top: 0),
+              ),
+              onSubmitted: (_) => sendMessage(_controller.text),
+            ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
+        // Send button (right)
         GestureDetector(
           onTap: isLoading ? null : () => sendMessage(_controller.text),
           child: Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryPurple,
-              shape: BoxShape.circle,
+            width: 43,
+            height: 43,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment(0.00, 0.83),
+                end: Alignment(0.84, 0.37),
+                colors: [
+                  Color(0xB2AE85E5),
+                  Color(0xFF8447D6),
+                  Color(0xFF572698),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x3F000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            child: const Icon(Icons.send, color: Colors.white, size: 22),
+            child: const Icon(Icons.send, color: Colors.white, size: 20),
           ),
         ),
       ],
     ),
   ),
-),
           ],
         ),
       ),
