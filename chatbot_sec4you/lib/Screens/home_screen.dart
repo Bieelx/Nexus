@@ -3,13 +3,13 @@ import '../../core/theme/app_colors.dart';
 
 //widgets
 import '../widgets/homeScreen/news_feed_widget.dart';
-//import 'widgets/homeScreen/map_calendar_switch.dart';
 import '../widgets/homeScreen/notification_card.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../security_alerts_screen_real.dart';
+import './profile_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -115,9 +115,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ],
                                     ),
                                   ),
-                                  const CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: AppColors.primaryPurple,
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(18),
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => const ProfilePage(),
+                                        ),
+                                      );
+                                    },
+                                    child: const CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: AppColors.primaryPurple,
+                                    ),
                                   ),
                                 ],
                               ),
