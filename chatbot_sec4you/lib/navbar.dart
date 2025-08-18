@@ -71,16 +71,37 @@ class CustomNavBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Center circle connector
+                  // Center circle connector (now clickable -> Chatbot at index 2)
                   Positioned(
                     left: segmentWidth,
                     top: 0,
                     width: centerDiameter,
                     height: navBarHeight,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: barColor,
-                        shape: BoxShape.circle,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onTap(2),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeOut,
+                        decoration: const BoxDecoration(
+                          color: barColor, // mantém o círculo com a cor da barra
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Container(
+                            // leve realce quando selecionado (coroa interna)
+                            padding: currentIndex == 2 ? const EdgeInsets.all(6) : EdgeInsets.zero,
+                            decoration: BoxDecoration(
+                              color: currentIndex == 2 ? highlightColor : Colors.transparent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.smart_toy_outlined, // ícone do Chatbot (Aura)
+                              size: 24,
+                              color: currentIndex == 2 ? iconSelected : iconUnselected,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
