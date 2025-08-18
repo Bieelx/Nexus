@@ -59,7 +59,7 @@ class SecurityEventService {
       
     } catch (e) {
       print('❌ Erro ao salvar no Firebase: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -191,7 +191,7 @@ class SecurityEventService {
       final failedAttempts = events.where((e) => e['success'] == false).length;
       final successfulLogins = events.where((e) => e['success'] == true).length;
 
-      print('✅ $email: ${events.length} eventos (${successfulLogins} sucessos, ${failedAttempts} falhas)');
+      print('✅ $email: ${events.length} eventos ($successfulLogins sucessos, $failedAttempts falhas)');
 
       return {
         'email': email,

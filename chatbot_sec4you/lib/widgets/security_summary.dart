@@ -3,6 +3,8 @@ import '../models/security_event.dart' as SecurityModels;
 import '../service/eventlog_service.dart';
 
 class SecuritySummary extends StatefulWidget {
+  const SecuritySummary({super.key});
+
   @override
   _SecuritySummaryState createState() => _SecuritySummaryState();
 }
