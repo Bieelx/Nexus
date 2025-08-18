@@ -1,15 +1,15 @@
 //Cores do app
-import '../core/theme/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 
 //widgets
-import 'widgets/homeScreen/news_feed_widget.dart';
+import '../widgets/homeScreen/news_feed_widget.dart';
 //import 'widgets/homeScreen/map_calendar_switch.dart';
-import 'widgets/homeScreen/notification_card.dart';
+import '../widgets/homeScreen/notification_card.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'security_alerts_screen_real.dart';
+import '../security_alerts_screen_real.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

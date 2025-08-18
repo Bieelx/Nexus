@@ -3,12 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'service/auth_service.dart';
 
-import 'login_page.dart';
-import 'home_screen.dart';
-import 'chat_screen.dart';
-import 'leak_check_screen.dart';
-import 'boards_screen.dart';
-import 'users_map_screen.dart';
+import 'Screens/login_page.dart';
+import 'Screens/home_screen.dart';
+import 'Screens/chat_screen.dart';
+import 'Screens/leak_check_screen.dart';
+import 'Screens/boards_screen.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
@@ -121,7 +120,7 @@ class _MainNavigationState extends State<MainNavigation> {
       ChatScreen(initialMessage: _autoMessage),
       LeakCheckerScreen(changeTab: _changeTab),
       BoardsScreen(),
-      UsersMapScreen(),
+      ChatScreen(initialMessage: _autoMessage),
 
     ];
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'local_data.dart';
+import '../../local_data.dart';
 
 class BoardScreen extends StatefulWidget {
   final String boardName;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'core/theme/app_colors.dart';
+import '../core/theme/app_colors.dart';
 
 
 class ChatScreen extends StatefulWidget {

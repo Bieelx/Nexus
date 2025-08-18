@@ -1,0 +1,815 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'Subscreens/board_screen.dart';
+import '../widgets/forum/forum_switcher.dart'; 
+import '../core/theme/app_colors.dart'; // para usar AppColors.primaryPurple
+import 'package:firebase_auth/firebase_auth.dart';
+
+String _normalize(String s) {
+  return s
+      .toLowerCase()
+      .replaceAll('á', 'a')
+      .replaceAll('à', 'a')
+      .replaceAll('â', 'a')
+      .replaceAll('ã', 'a')
+      .replaceAll('é', 'e')
+      .replaceAll('ê', 'e')
+      .replaceAll('í', 'i')
+      .replaceAll('ó', 'o')
+      .replaceAll('ô', 'o')
+      .replaceAll('õ', 'o')
+      .replaceAll('ú', 'u')
+      .replaceAll('ç', 'c');
+}
+
+_GroupTheme _themeFor(String idOrName) {
+  final key = _normalize(idOrName);
+
+  // Roxo (gamer)
+  const purple = _GroupTheme(
+    gradient: [Color(0xFF6638B6), Color(0xFF634A9E)],
+    border: Color(0xFF6C52BB),
+    desc: Color(0xFFD5C4F3),
+    user: Color(0xFFA259FF),
+  );
+
+  // Azul (geral)
+  const blue = _GroupTheme(
+    gradient: [Color(0xFF3251A3), Color(0xFF2E3F7A)],
+    border: Color(0xFF678EE6),
+    desc: Color(0xFF9AB5EF),
+    user: Color(0xFF678EE6),
+  );
+
+  // Vermelho (cibersegurança)
+  const red = _GroupTheme(
+    gradient: [Color(0xFF834748), Color(0xFF5E3334)],
+    border: Color(0xFFD07274),
+    desc: Color(0xFFD58F90),
+    user: Color(0xFFD64344),
+  );
+
+  // Verde (dúvidas)
+  const green = _GroupTheme(
+    gradient: [Color(0xFF2E8B57), Color(0xFF236C44)],
+    border: Color(0xFF58C08A),
+    desc: Color(0xFFA8E0C7),
+    user: Color(0xFF58C08A),
+  );
+
+  if (key.contains('geral')) return blue;
+  if (key.contains('duvida')) return green;
+  if (key.contains('gamer')) return purple;
+  if (key.contains('ciber')) return red;
+
+  // fallback: roxo
+  return purple;
+}
+
+class BoardsScreen extends StatefulWidget {
+  const BoardsScreen({super.key});
+
+  @override
+  State<BoardsScreen> createState() => _BoardsScreenState();
+}
+
+class _GroupTheme {
+  final List<Color> gradient;
+  final Color border;
+  final Color desc;    // descrição
+  final Color user;    // cor do "nome do usuário" na última msg
+  const _GroupTheme({
+    required this.gradient,
+    required this.border,
+    required this.desc,
+    required this.user,
+  });
+}
+
+class _BoardsScreenState extends State<BoardsScreen> {
+  bool _showGroups = true;
+  Future<void> _openCreatePostSheet() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Faça login para postar.')),
+    );
+    return;
+  }
+
+  final controller = TextEditingController();
+  bool isPosting = false;
+
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF2A2F3E),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      final viewInset = MediaQuery.of(ctx).viewInsets.bottom;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + viewInset),
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            Future<void> submit() async {
+              final text = controller.text.trim();
+              if (text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Escreva algo antes de publicar.')),
+                );
+                return;
+              }
+              setSheetState(() => isPosting = true);
+              try {
+                await FirebaseFirestore.instance.collection('posts').add({
+                  'text': text,
+                  'authorId': user.uid,
+                  'authorName': user.displayName ?? 'Usuário',
+                  'createdAt': FieldValue.serverTimestamp(),
+                  'parentId': null, // raiz (não é reply/thread)
+                  'likes': 0,
+                  'commentsCount': 0,
+                });
+                Navigator.of(context).pop(); // fecha o sheet
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  const SnackBar(content: Text('Post publicado!')),
+                );
+              } catch (e) {
+                setSheetState(() => isPosting = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erro ao publicar: $e')),
+                );
+              }
+            }
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Novo post',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  maxLines: 6,
+                  maxLength: 500,
+                  style: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
+                  decoration: InputDecoration(
+                    hintText: 'Escreva algo…',
+                    hintStyle: const TextStyle(color: Colors.white70, fontFamily: 'Poppins'),
+                    filled: true,
+                    fillColor: const Color(0xFF3A4052),
+                    counterStyle: const TextStyle(color: Colors.white54, fontFamily: 'Poppins'),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF6C52BB)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primaryPurple, width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: isPosting ? null : () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white24),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          textStyle: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isPosting ? null : submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryPurple,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          textStyle: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700),
+                        ),
+                        child: isPosting
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Text('Publicar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    },
+  );
+}
+
+  Future<void> addBoard() async {
+    final controller = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Novo Grupo'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Nome do grupo'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, {
+              'name': controller.text.trim(),
+              'description': descriptionController.text.trim(),
+            }),
+            child: const Text('Criar'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+
+    final name = result['name'] ?? '';
+    final description = result['description'] ?? '';
+
+    if (name.isEmpty) return;
+
+    // cria um id "slug"
+    String id = name
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_\$'), '');
+
+    if (id.isEmpty) id = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final groups = FirebaseFirestore.instance.collection('groups');
+
+    try {
+      final doc = await groups.doc(id).get();
+      if (doc.exists) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Grupo já existe.')),
+          );
+        }
+        return;
+      }
+
+      await groups.doc(id).set({
+        'name': name,
+        'description': description,
+        'createdAt': FieldValue.serverTimestamp(),
+        'lastMessage': '',
+        'lastMessageAt': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Grupo "$name" criado.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Falha ao criar grupo: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final groupsRef = FirebaseFirestore.instance.collection('groups');
+
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: Container(
+          color: Colors.transparent,
+          padding: const EdgeInsets.only(top: 68, left: 16),
+          alignment: Alignment.topLeft,
+          child: const Text(
+            '<Fórum./>',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF8447D6),
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          ForumSwitcher(
+            showGroups: _showGroups,
+            onChanged: (val) => setState(() => _showGroups = val),
+          ),
+          Expanded(
+            child: _showGroups ? _buildGroupsList() : _buildTimeline(),
+          ),
+        ],
+      ),
+      // 👇 FAB só na Timeline
+      floatingActionButton: _showGroups
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _openCreatePostSheet,
+              backgroundColor: AppColors.primaryPurple,
+              icon: const Icon(Icons.edit),
+              label: const Text(
+                'Postar',
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildGroupsList() {
+    final groupsRef = FirebaseFirestore.instance.collection('groups');
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: groupsRef.snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Erro ao carregar grupos', style: TextStyle(color: Colors.white)));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        debugPrint('🔥 Groups loaded: ${docs.length}');
+        if (docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'Nenhum grupo encontrado.',
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const Divider(height: 1, color: Colors.white12),
+          itemBuilder: (context, index) {
+            final data = docs[index].data();
+            final name = (data['name'] ?? '') is String ? data['name'] as String : data['name']?.toString() ?? '';
+            final description = (data['description'] ?? '') is String ? data['description'] as String : data['description']?.toString() ?? '';
+            final lastMessage = (data['lastMessage'] ?? '') is String ? data['lastMessage'] as String : data['lastMessage']?.toString() ?? '';
+
+            final id = docs[index].id;
+            final theme = _themeFor(name.isNotEmpty ? name : id);
+
+            final preview = lastMessage.isNotEmpty ? lastMessage : description;
+            final userColor = theme.user;
+            final descColor = theme.desc;
+
+            final size = MediaQuery.of(context).size;
+            final cardWidth = size.width - 32;
+            final scale = cardWidth / 380.0; // base Figma
+            final cardHeight = 180.0 * scale;
+
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BoardScreen(boardName: name)),
+                );
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                width: cardWidth,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                decoration: ShapeDecoration(
+                  gradient: LinearGradient(
+                    begin: const Alignment(0.08, 0.68),
+                    end: const Alignment(0.59, 0.69),
+                    colors: theme.gradient,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(width: 1, color: theme.border),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: cardHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '<${name.isNotEmpty ? name : id}/>',
+                                style: const TextStyle(
+                                  color: Color(0xFFA259FF),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1,
+                                  letterSpacing: 0.20,
+                                  fontFamily: 'Poppins',
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: const Color(0xFFA259FF),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                foregroundColor: Colors.white,
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Poppins',
+                                ),
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => BoardScreen(boardName: name)),
+                                );
+                              },
+                              child: const Text('Entrar'),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 11),
+
+                        Text(
+                          description.isNotEmpty ? description : 'Sem descrição',
+                          style: TextStyle(
+                            color: descColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            height: 1.67,
+                            letterSpacing: 0.12,
+                            fontFamily: 'Poppins',
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        const Text(
+                          'Última mensagem:',
+                          style: TextStyle(
+                            color: Color(0xFFA5A3A7),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            height: 1.83,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        RichText(
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'User: ',
+                                style: TextStyle(
+                                  color: userColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.83,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              TextSpan(
+                                text: preview.isNotEmpty ? preview : 'Sem mensagens ainda',
+                                style: const TextStyle(
+                                  color: Color(0xFFFEF7FF),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.83,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTimeline() {
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid;
+    final postsRef = FirebaseFirestore.instance
+        .collection('posts')
+        .where('parentId', isNull: true)
+        .orderBy('createdAt', descending: true)
+        .limit(50);
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: postsRef.snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Erro ao carregar timeline', style: TextStyle(color: Colors.white)));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return const Center(
+            child: Text('Sem posts ainda 🙂', style: TextStyle(color: Colors.white70)),
+          );
+        }
+
+        return ListView.separated(
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          itemBuilder: (context, index) {
+            final snap = docs[index];
+            final data = snap.data();
+            final text = (data['text'] ?? '').toString();
+            final authorName = (data['authorName'] ?? 'Usuário').toString();
+            final authorHandle = (data['authorHandle'] ?? _normalize(authorName).replaceAll(' ', '_')).toString();
+            final likes = (data['likes'] ?? 0) is int ? data['likes'] as int : int.tryParse('${data['likes']}') ?? 0;
+            final comments = (data['commentsCount'] ?? 0) is int ? data['commentsCount'] as int : int.tryParse('${data['commentsCount']}') ?? 0;
+            final ts = (data['createdAt'] as Timestamp?);
+            final dt = ts?.toDate();
+            final now = DateTime.now();
+            String timeAgo = '';
+            if (dt != null) {
+              final diff = now.difference(dt);
+              if (diff.inMinutes < 60) {
+                timeAgo = '${diff.inMinutes}m';
+              } else if (diff.inHours < 24) {
+                timeAgo = '${diff.inHours}h';
+              } else {
+                timeAgo = '${diff.inDays}d';
+              }
+            }
+            final List<dynamic> likedByRaw = (data['likedBy'] ?? []) as List<dynamic>;
+            final likedBy = likedByRaw.map((e) => e.toString()).toList();
+            final bool isLiked = uid != null && likedBy.contains(uid);
+            Future<void> toggleLike() async {
+              if (uid == null) return;
+              final ref = FirebaseFirestore.instance.collection('posts').doc(snap.id);
+              await FirebaseFirestore.instance.runTransaction((tx) async {
+                final doc = await tx.get(ref);
+                final data = (doc.data() as Map<String, dynamic>? ) ?? {};
+                final List<dynamic> liked = (data['likedBy'] ?? []) as List<dynamic>;
+                final int currentLikes = (data['likes'] ?? 0) is int
+                    ? data['likes'] as int
+                    : int.tryParse('${data['likes']}') ?? 0;
+                final already = liked.map((e) => e.toString()).contains(uid);
+                if (already) {
+                  tx.update(ref, {
+                    'likes': currentLikes > 0 ? currentLikes - 1 : 0,
+                    'likedBy': FieldValue.arrayRemove([uid]),
+                  });
+                } else {
+                  tx.update(ref, {
+                    'likes': currentLikes + 1,
+                    'likedBy': FieldValue.arrayUnion([uid]),
+                  });
+                }
+              });
+            }
+            return _PostCard(
+              postId: snap.id,
+              text: text,
+              authorName: authorName,
+              authorHandle: '@$authorHandle',
+              timeLabel: timeAgo,
+              likeCount: likes,
+              commentCount: comments,
+              isLiked: isLiked,
+              onToggleLike: toggleLike,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _PostCard extends StatelessWidget {
+  final String postId;
+  final String text;
+  final String authorName;
+  final String authorHandle;
+  final String timeLabel;
+  final int likeCount;
+  final int commentCount;
+  final bool isLiked;
+  final Future<void> Function() onToggleLike;
+
+  const _PostCard({
+    required this.postId,
+    required this.text,
+    required this.authorName,
+    required this.authorHandle,
+    required this.timeLabel,
+    required this.likeCount,
+    required this.commentCount,
+    required this.isLiked,
+    required this.onToggleLike,
+  });
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r"\s+"));
+    if (parts.isEmpty) return 'U';
+    final first = parts.first.isNotEmpty ? parts.first[0] : '';
+    final last = parts.length > 1 && parts.last.isNotEmpty ? parts.last[0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2B3242),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x334D5A7A)),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Avatar redondo roxo com iniciais
+              Container(
+                height: 36,
+                width: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFA259FF), Color(0xFF8447D6)],
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _initials(authorName),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            authorName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.more_horiz, color: Colors.white54, size: 18),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$authorHandle · $timeLabel',
+                      style: const TextStyle(color: Colors.white54, fontSize: 12, fontFamily: 'Poppins'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4, fontFamily: 'Poppins'),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0x22FFFFFF), height: 1),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _ActionIcon(
+                icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                count: likeCount,
+                onTap: () async {
+                  await onToggleLike();
+                },
+                color: isLiked ? AppColors.primaryPurple : Colors.white70,
+              ),
+              const SizedBox(width: 18),
+              _ActionIcon(
+                icon: Icons.mode_comment_outlined,
+                count: commentCount,
+                onTap: () {},
+              ),
+              const SizedBox(width: 18),
+              _ActionIcon(
+                icon: Icons.share_outlined,
+                count: 0,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionIcon extends StatelessWidget {
+  final IconData icon;
+  final int count;
+  final VoidCallback onTap;
+  final Color? color;
+  const _ActionIcon({required this.icon, required this.count, required this.onTap, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color ?? Colors.white70, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              '$count',
+              style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Poppins'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

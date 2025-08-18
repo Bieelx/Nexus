@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import './widgets/leak_widget.dart';
+import '../widgets/leak_widget.dart';
 
 class LeakCheckerScreen extends StatefulWidget {
   final Function(int, String) changeTab;
@@ -295,23 +295,138 @@ class _LeakCheckerScreenState extends State<LeakCheckerScreen> {
     );
   }
 
+  Widget _buildStatusBanner() {
+    // Determine state from the current resultMessage
+    final bool isLeaked = resultMessage.contains('⚠️');
+
+    // Colors from the design tokens (blue safe / red alert)
+    const safeBg = Color(0xAD3251A3);
+    const safeBorder = Color(0xFF678EE6);
+    const safePrimary = Color(0xFFB8CBF4);
+    const safeSecondary = Color(0xFF9AB5EF);
+
+    const alertBg = Color(0xB2834748);
+    const alertBorder = Color(0xFFD07274);
+    const alertPrimary = Color(0xFFD58F90);
+    const alertAccent = Color(0xFFD64344);
+
+    // Decide texts
+    String title;
+    String subtitle;
+
+    if (isLeaked) {
+      final match = RegExp(r'\((\d+)\s+vezes\)').firstMatch(resultMessage);
+      final countStr = match != null ? match.group(1) : null;
+
+      final humanType = selectedType == 'Email'
+          ? 'email'
+          : selectedType == 'Senha'
+              ? 'senha'
+              : selectedType == 'Telefone'
+                  ? 'telefone'
+                  : 'site';
+
+      title = 'Foram detectados vazamentos';
+      subtitle = countStr != null
+          ? 'Seu $humanType apareceu em $countStr vazamentos.'
+          : 'Seu $humanType foi encontrado em vazamentos.';
+    } else {
+      final hasResult = resultMessage.isNotEmpty;
+      final humanType = selectedType == 'Email'
+          ? 'email'
+          : selectedType == 'Senha'
+              ? 'senha'
+              : selectedType == 'Telefone'
+                  ? 'telefone'
+                  : 'site';
+
+      title = hasResult ? 'Parabéns!' : 'Verificação segura';
+      subtitle = hasResult
+          ? 'Seu $humanType não foi encontrado em vazamentos.'
+          : 'Seus dados não serão armazenados';
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isLeaked ? alertBg : safeBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isLeaked ? alertBorder : safeBorder, width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon circle
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(
+              isLeaked ? Icons.shield : Icons.shield_outlined,
+              color: isLeaked ? alertAccent : safePrimary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Texts
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: isLeaked ? alertPrimary : safePrimary,
+                    fontSize: 13,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: isLeaked ? alertAccent : safeSecondary,
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 @override
 Widget build(BuildContext context) {
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
 
   // Proporcional ao design base
-  final topSpacing = screenHeight * 0.093;     // 83/892
-  final leftPadding = screenWidth * 0.039;     // 16/412
+  // final topSpacing = screenHeight * 0.093;     // 83/892
+  // final leftPadding = screenWidth * 0.039;     // 16/412
 
   return Scaffold(
     body: SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: topSpacing),
           Padding(
-            padding: EdgeInsets.only(left: leftPadding),
+            padding: const EdgeInsets.only(
+              left: 16,
+              top: 68,
+              bottom: 63,
+            ),
             child: const Text(
               '<Vazamento./>',
               style: TextStyle(
@@ -334,8 +449,10 @@ Widget build(BuildContext context) {
             },
             isLoading: isLoading,
             onVerify: verifyData,
-            resultMessage: resultMessage,
+            resultMessage: '',
           ),
+          const SizedBox(height: 12),
+          _buildStatusBanner(),
         ],
       ),
     ),

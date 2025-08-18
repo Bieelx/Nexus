@@ -1,7 +1,7 @@
 import 'package:chatbot_sec4you/auth_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'service/auth_service.dart';
+import '../service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
