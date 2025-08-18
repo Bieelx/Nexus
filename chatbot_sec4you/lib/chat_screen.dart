@@ -224,19 +224,64 @@ Widget buildMessage(Map<String, String> msg) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: false,
-        titleSpacing: 16, // 16px da borda esquerda
-        iconTheme: const IconThemeData(color: AppColors.white),
-        title: const Text(
-          '<Chat Bot./>',
-          style: TextStyle(
-            color: AppColors.primaryPurple,
-            fontSize: 22,
-            fontFamily: 'JetBrainsMono',
-            fontWeight: FontWeight.w400,
-          ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(112), // altura máxima aproximada (ajustada dinamicamente abaixo)
+        child: Builder(
+          builder: (context) {
+            final media = MediaQuery.of(context);
+            final statusBar = media.padding.top; // altura do status bar (varia por device)
+            const desiredTop = 67.0;             // distância alvo a partir do topo da tela
+            const leftPad = 16.0;                // distância alvo da borda esquerda
+
+            final topPad = (desiredTop - statusBar).clamp(0.0, 200.0); // garante não-negativo
+
+            return Container(
+              color: Colors.transparent,
+              padding: EdgeInsets.only(top: topPad, left: leftPad, right: 16),
+              // altura exata = offset superior + altura do conteúdo (aprox. 68)
+              child: SizedBox(
+                height: 68,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Color(0xFFD9D9D9),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          'Converse com a',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 18,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            height: 1.1,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          '<Lua/>',
+                          style: TextStyle(
+                            color: AppColors.primaryPurple,
+                            fontSize: 18,
+                            fontFamily: 'JetBrainsMono',
+                            fontWeight: FontWeight.w600,
+                            height: 1.1,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
       body: SafeArea(
@@ -269,32 +314,41 @@ Container(
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: TextField(
-              controller: _controller,
-              enabled: !isLoading,
-              textAlignVertical: TextAlignVertical.bottom,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                height: 1.83,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
-                hintStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  height: 1.83,
-                ),
-                isDense: true,
-                contentPadding: const EdgeInsets.only(left: 4, right: 4, bottom: 10, top: 0),
-              ),
-              onSubmitted: (_) => sendMessage(_controller.text),
-            ),
+            child: Align(
+  alignment: Alignment.centerLeft,
+  child: ConstrainedBox(
+    constraints: const BoxConstraints(minHeight: 0),
+    child: TextField(
+      controller: _controller,
+      enabled: !isLoading,
+      textInputAction: TextInputAction.send,
+      minLines: 1,
+      maxLines: 1,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 12,
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w600,
+        height: 1.3,
+      ),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        isCollapsed: true,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        hintText: isLoading ? "Aguarde a resposta..." : "Digite aqui...",
+        hintStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+        ),
+      ),
+      onSubmitted: (_) => sendMessage(_controller.text),
+    ),
+  ),
+)
           ),
         ),
         const SizedBox(width: 8),

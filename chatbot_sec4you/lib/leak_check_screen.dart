@@ -305,7 +305,6 @@ Widget build(BuildContext context) {
   final leftPadding = screenWidth * 0.039;     // 16/412
 
   return Scaffold(
-    backgroundColor: const Color(0xFF0D0D0D),
     body: SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

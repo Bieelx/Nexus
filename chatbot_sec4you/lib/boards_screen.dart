@@ -49,7 +49,6 @@ class _BoardsScreenState extends State<BoardsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
       appBar: AppBar(
         title: const Text(
           '<Fórum./>',
@@ -58,7 +57,6 @@ class _BoardsScreenState extends State<BoardsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFF1A1A1A),
         iconTheme: const IconThemeData(color: Color(0xFFFAF9F6)),
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: addBoard),

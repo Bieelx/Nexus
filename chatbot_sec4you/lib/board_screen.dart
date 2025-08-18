@@ -60,10 +60,8 @@ void sendPost() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
       appBar: AppBar(
         title: Text(widget.boardName, style: const TextStyle(color: Color(0xFFFAF9F6))),
-        backgroundColor: const Color(0xFF1A1A1A),
         iconTheme: const IconThemeData(color: Color(0xFFFAF9F6)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

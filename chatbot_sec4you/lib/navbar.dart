@@ -1,178 +1,232 @@
 import 'package:flutter/material.dart';
 
-/// Barra inferior personalizada com "pílula" expansível no item selecionado
-/// e botão circular do Luizinho ao lado direito.
-/// Use assim:
-/// CustomNavBar(currentIndex: _selectedIndex, onTap: _onTabTapped)
+/// Barra inferior com dois "pills" laterais conectados por um círculo central.
+/// Ícones sem rótulo; o ícone selecionado recebe um destaque circular.
+/// Mantém a mesma API de antes:
+///   CustomNavBar(currentIndex: _index, onTap: _onTap)
 class CustomNavBar extends StatelessWidget {
-  final int currentIndex;
+  final int currentIndex; // 0..3
   final ValueChanged<int> onTap;
 
-  const CustomNavBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const CustomNavBar({super.key, required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    // Cores (novo esquema)
-    const Color barColor = Color(0xFF434958); // fundo da barra
-    const Color pillColor = Color(0xFF6B7691); // fundo da pílula
-    const Color iconSelected = Color(0xFF202634); // ícone/label selecionados
-    const Color iconUnselected = Color(0xFFDEE1E7); // ícones não selecionados
+    // Paleta
+    const Color barColor = Color(0xFF434958); // fundo dos pills e círculo central
+    const Color iconUnselected = Color(0xFFDEE1E7);
+    const Color highlightColor = Color(0xFF6C7691); // círculo de seleção
+    const Color iconSelected = Color(0xFF202634);
+    const double bridgeWidth = 28.0, bridgeHeight = 20.0; // “ponte” estreita entre os pills e o círculo
 
-    const double navBarHeight = 56.16;
-    const double horizontalPadding = 16; // espaço lateral
-    const double verticalGap = 5; // “respiro” top/bottom quando selecionado
+    const double navBarHeight = 56.0; // mesma referência do seu mock
+    const double sidePadding = 16.0;
+    const double highlightSize = 44.0; // diâmetro do círculo de seleção
 
-    // Largura “base” do Figma para escalar a largura da pílula
-    const double baseNavWidth = 281;
-    const double basePillWidth = 108;
-
-    // Reservamos ~72px para o “Luizinho” ao lado
-    final double availableNavWidth =
-        MediaQuery.of(context).size.width - (horizontalPadding * 2) - 72;
-
-    final double scale = (availableNavWidth / baseNavWidth).clamp(0.75, 1.25);
-    final double pillWidth = basePillWidth * scale; // usado para padding mínimo
-    final double pillHeight = navBarHeight - (verticalGap * 2);
-
-    const items = <_NavItem>[
-      _NavItem(Icons.home, 'Home'),
-      _NavItem(Icons.menu_book_rounded, 'Cursos'),
-      _NavItem(Icons.shield_outlined, 'Vazamentos'),
-      _NavItem(Icons.person_outline, 'Perfil'),
+    const items = <IconData>[
+      Icons.home,
+      Icons.menu_book_rounded,
+      Icons.shield_outlined, // ajuste se quiser usar outro ícone (ex.: incognito)
+      Icons.person_outline,
     ];
 
     return SafeArea(
-      bottom: true,
-      minimum: const EdgeInsets.only(bottom: 12), // evita encostar no rodapé
+      minimum: const EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // ------- Barra principal -------
-            Expanded(
-              child: Container(
-                height: navBarHeight,
-                decoration: BoxDecoration(
-                  color: barColor,
-                  borderRadius: BorderRadius.circular(navBarHeight / 2),
-                ),
-                child: Row(
-                  children: List.generate(items.length, (i) {
-                    final bool selected = i == currentIndex;
+        padding: const EdgeInsets.symmetric(horizontal: sidePadding),
+        child: SizedBox(
+          height: navBarHeight,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double totalWidth = constraints.maxWidth;
+              final double centerDiameter = navBarHeight; // círculo central
+              final double segmentWidth = (totalWidth - centerDiameter) / 2;
 
-                    // Usa flex maior no selecionado para “empurrar” os vizinhos
-                    final int flex = selected ? 4 : 2;
+              return Stack(
+                children: [
+                  // ====== BACKGROUND ======
+                  // Left pill
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    width: segmentWidth,
+                    height: navBarHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(navBarHeight / 2),
+                      ),
+                    ),
+                  ),
+                  // Right pill
+                  Positioned(
+                    left: segmentWidth + centerDiameter,
+                    top: 0,
+                    width: segmentWidth,
+                    height: navBarHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(navBarHeight / 2),
+                      ),
+                    ),
+                  ),
+                  // Center circle connector
+                  Positioned(
+                    left: segmentWidth,
+                    top: 0,
+                    width: centerDiameter,
+                    height: navBarHeight,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: barColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  // Bridges para conectar visualmente os blocos (sem “buraco”)
+                  Positioned(
+                    left: segmentWidth - (bridgeWidth / 2),
+                    top: (navBarHeight - bridgeHeight) / 2,
+                    width: bridgeWidth,
+                    height: bridgeHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(bridgeHeight / 2),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: segmentWidth + centerDiameter - (bridgeWidth / 2),
+                    top: (navBarHeight - bridgeHeight) / 2,
+                    width: bridgeWidth,
+                    height: bridgeHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(bridgeHeight / 2),
+                      ),
+                    ),
+                  ),
 
-                    return Expanded(
-                      flex: flex,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => onTap(i),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOut,
-                          margin: EdgeInsets.symmetric(
-                            vertical: selected ? verticalGap : 0,
-                            horizontal: 6,
-                          ),
-                          height: selected ? pillHeight : navBarHeight,
-                          decoration: selected
-                              ? BoxDecoration(
-                                  color: pillColor,
-                                  borderRadius:
-                                      BorderRadius.circular(navBarHeight / 2),
-                                )
-                              : const BoxDecoration(),
-                          constraints: BoxConstraints(
-                            minWidth: selected ? pillWidth : 0, // evita a “sumida” do label
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: selected ? 12 : 0,
-                          ),
+                  // ====== FOREGROUND (ícones + toques) ======
+                  // Área clicável/flex de ícones
+                  Positioned.fill(
+                    child: Row(
+                      children: [
+                        // Left segment -> dois itens: 0,1
+                        SizedBox(
+                          width: segmentWidth,
+                          height: navBarHeight,
                           child: Row(
-                            mainAxisAlignment: selected
-                                ? MainAxisAlignment.start
-                                : MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Icon(
-                                items[i].icon,
-                                size: 24,
-                                color: selected ? iconSelected : iconUnselected,
+                              _NavIcon(
+                                icon: items[0],
+                                selected: currentIndex == 0,
+                                onTap: () => onTap(0),
+                                highlightColor: highlightColor,
+                                iconSelected: iconSelected,
+                                iconUnselected: iconUnselected,
+                                size: highlightSize,
                               ),
-                              if (selected) ...[
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    items[i].label,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.2,
-                                      color: iconSelected,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              _NavIcon(
+                                icon: items[1],
+                                selected: currentIndex == 1,
+                                onTap: () => onTap(1),
+                                highlightColor: highlightColor,
+                                iconSelected: iconSelected,
+                                iconUnselected: iconUnselected,
+                                size: highlightSize,
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ),
 
-            // Espaço entre a barra e o botão do "Luizinho"
-            const SizedBox(width: 12),
+                        // Center spacer (não clicável)
+                        SizedBox(width: centerDiameter, height: navBarHeight),
 
-            // ------- Botão "Luizinho" -------
-            GestureDetector(
-              onTap: () => onTap(4), // índice reservado para o chat/IA
-              child: Container(
-                width: navBarHeight,
-                height: navBarHeight,
-                decoration: BoxDecoration(
-                  color: currentIndex == 4 ? pillColor : barColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/luizinho.png', // garanta que está declarado no pubspec.yaml
-                      width: navBarHeight * 0.66,
-                      height: navBarHeight * 0.66,
-                      fit: BoxFit.cover,
+                        // Right segment -> dois itens: 2,3
+                        SizedBox(
+                          width: segmentWidth,
+                          height: navBarHeight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _NavIcon(
+                                icon: items[2],
+                                selected: currentIndex == 2,
+                                onTap: () => onTap(2),
+                                highlightColor: highlightColor,
+                                iconSelected: iconSelected,
+                                iconUnselected: iconUnselected,
+                                size: highlightSize,
+                              ),
+                              _NavIcon(
+                                icon: items[3],
+                                selected: currentIndex == 3,
+                                onTap: () => onTap(3),
+                                highlightColor: highlightColor,
+                                iconSelected: iconSelected,
+                                iconUnselected: iconUnselected,
+                                size: highlightSize,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
-            ),
-          ],
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-/// Item da barra (ícone + label).
-class _NavItem {
+class _NavIcon extends StatelessWidget {
   final IconData icon;
-  final String label;
-  const _NavItem(this.icon, this.label);
+  final bool selected;
+  final VoidCallback onTap;
+  final Color highlightColor;
+  final Color iconSelected;
+  final Color iconUnselected;
+  final double size;
+
+  const _NavIcon({
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+    required this.highlightColor,
+    required this.iconSelected,
+    required this.iconUnselected,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: selected ? highlightColor : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 24,
+          color: selected ? iconSelected : iconUnselected,
+        ),
+      ),
+    );
+  }
 }
