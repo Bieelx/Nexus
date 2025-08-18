@@ -305,7 +305,7 @@ class _SecurityAlertsScreenRealState extends State<SecurityAlertsScreenReal> {
           ),
         ),
         SizedBox(height: 12),
-        ...securityEvents.map((event) => _buildEventCard(event)).toList(),
+        ...securityEvents.map((event) => _buildEventCard(event)),
       ],
     );
   }

@@ -5,10 +5,10 @@ class MapCalendarSwitch extends StatelessWidget {
   final Function(bool) onChanged;
 
   const MapCalendarSwitch({
-    Key? key,
+    super.key,
     required this.isMapSelected,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

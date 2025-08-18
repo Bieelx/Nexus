@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SecurityTestScreen extends StatelessWidget {
+  const SecurityTestScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,11 +47,11 @@ class SecurityTestScreen extends StatelessWidget {
             SizedBox(height: 32),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Voltar'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF7F2AB1),
                 foregroundColor: Colors.white,
               ),
+              child: Text('Voltar'),
             ),
           ],
         ),

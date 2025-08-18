@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class NotificationCard extends StatelessWidget {
   final String count;
-  const NotificationCard({Key? key, this.count = '0'}) : super(key: key);
+  const NotificationCard({super.key, this.count = '0'});
 
   @override
   Widget build(BuildContext context) {

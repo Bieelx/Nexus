@@ -41,7 +41,7 @@ class SecurityEventService {
       
     } catch (e) {
       print('❌ Erro ao salvar: $e');
-      throw e;
+      rethrow;
     }
   }
 
