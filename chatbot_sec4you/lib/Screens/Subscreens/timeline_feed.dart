@@ -43,16 +43,45 @@ class TimelineFeed extends StatelessWidget {
             final snap = docs[index];
             final data = snap.data();
 
+            // -------- Safe/defensive parsing (avoid null-is-not-a-List) --------
             final text = (data['text'] ?? '').toString();
+
             final authorName = (data['authorName'] ?? 'Usuário').toString();
-            final authorHandle =
-                (data['authorHandle'] ?? _normalize(authorName)).toString();
-            final likes = (data['likes'] ?? 0) is int
-                ? data['likes'] as int
-                : int.tryParse('${data['likes']}') ?? 0;
-            final likedBy = (data['likedBy'] ?? []) is List
-                ? List<String>.from(data['likedBy'] as List)
-                : <String>[];
+            final authorHandle = (data['authorHandle'] ?? _normalize(authorName)).toString();
+
+            // likes can come as number or string (or null)
+            int likes;
+            final rawLikes = data['likes'];
+            if (rawLikes is int) {
+              likes = rawLikes;
+            } else if (rawLikes is num) {
+              likes = rawLikes.toInt();
+            } else if (rawLikes is String) {
+              likes = int.tryParse(rawLikes) ?? 0;
+            } else {
+              likes = 0;
+            }
+
+            // likedBy can come null, List<dynamic>, Set, etc. Coerce to List<String>.
+            List<String> likedBy;
+            final rawLikedBy = data['likedBy'];
+            if (rawLikedBy is Iterable) {
+              likedBy = rawLikedBy.map((e) => e.toString()).toList();
+            } else {
+              likedBy = <String>[];
+            }
+
+            // (Optional) Patch document missing defaults once to keep DB consistent
+            if ((data['likedBy'] == null) || (data['likes'] == null)) {
+              try {
+                snap.reference.update({
+                  if (data['likedBy'] == null) 'likedBy': <String>[],
+                  if (data['likes'] == null) 'likes': 0,
+                });
+              } catch (_) {
+                // ignore: best effort
+              }
+            }
 
             final ts = data['createdAt'] as Timestamp?;
             final dt = ts?.toDate();
@@ -130,6 +159,8 @@ class _PostCard extends StatelessWidget {
       if (!snap.exists) return;
 
       final data = snap.data() as Map<String, dynamic>;
+      final authorId = (data['authorId'] ?? '').toString();
+
       final currentLikes = (data['likes'] ?? 0) is int
           ? data['likes'] as int
           : int.tryParse('${data['likes']}') ?? 0;
@@ -139,15 +170,35 @@ class _PostCard extends StatelessWidget {
 
       final already = likedBy.contains(user.uid);
       if (already) {
+        // Remover like
         tx.update(postRef, {
           'likedBy': FieldValue.arrayRemove([user.uid]),
           'likes': currentLikes > 0 ? currentLikes - 1 : 0,
         });
+        // Opcionalmente não decrementamos unreadCount aqui.
       } else {
+        // Adicionar like
         tx.update(postRef, {
           'likedBy': FieldValue.arrayUnion([user.uid]),
           'likes': currentLikes + 1,
         });
+
+        // Notifica o autor (se não for o próprio)
+        if (authorId.isNotEmpty && authorId != user.uid) {
+          final authorDoc = FirebaseFirestore.instance.collection('users').doc(authorId);
+          final notifRef = authorDoc.collection('notifications').doc();
+
+          tx.set(notifRef, {
+            'type': 'like',
+            'postId': postId,
+            'actorId': user.uid,
+            'actorName': user.displayName ?? user.email ?? 'Usuário',
+            'createdAt': FieldValue.serverTimestamp(),
+            'read': false,
+          });
+
+          tx.update(authorDoc, {'unreadCount': FieldValue.increment(1)});
+        }
       }
     });
   }
@@ -387,6 +438,29 @@ class _CommentsSheetState extends State<_CommentsSheet> {
         'authorName': authorName,
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // Notificar o autor do post (não notifica a si mesmo)
+      try {
+        final postSnap = await FirebaseFirestore.instance.collection('posts').doc(widget.postId).get();
+        final postData = postSnap.data() as Map<String, dynamic>?;
+        final authorId = (postData?['authorId'] ?? '').toString();
+
+        if (authorId.isNotEmpty && authorId != user.uid) {
+          final authorDoc = FirebaseFirestore.instance.collection('users').doc(authorId);
+          await authorDoc.collection('notifications').add({
+            'type': 'comment',
+            'postId': widget.postId,
+            'actorId': user.uid,
+            'actorName': authorName,
+            'text': text,
+            'createdAt': FieldValue.serverTimestamp(),
+            'read': false,
+          });
+          await authorDoc.update({'unreadCount': FieldValue.increment(1)});
+        }
+      } catch (_) {
+        // Best-effort: se falhar, apenas segue sem quebrar o fluxo
+      }
 
       _controller.clear();
     } finally {

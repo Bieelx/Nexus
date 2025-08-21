@@ -13,7 +13,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 import 'navbar.dart'; 
-import 'core/theme/app_colors.dart';
 import 'widgets/gradient_background.dart';
 
 class AuthCheck extends StatelessWidget {
