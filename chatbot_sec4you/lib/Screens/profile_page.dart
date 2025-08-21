@@ -1,3 +1,11 @@
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarEmailPage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarIdiomaPage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarNotificacoesPage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarPrivacidadePage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarSenhaPage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/AlterarTemaPage.dart';
+import 'package:chatbot_sec4you/Screens/Subscreens/alterar_Profile_Page.dart';
+import 'package:chatbot_sec4you/Screens/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,14 +16,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:typed_data';
 import 'dart:io' show File;
 
-
 /// ======= CORES / CONFIG =======
 const kAccent = Color(0xFFA259FF); // #A259FF (roxo pedido)
 const kBg = Color(0xFF121212);
 const kCard = Color(0xFF2A2A2A);
 const kText = Color(0xFFFAF9F6);
 const String kAvatarAsset = 'assets/foto_perfil.png';
-
 
 /// Página pública usada no Navigator do app.
 /// Envelopa a implementação interna `ProfileScreen`.
@@ -39,7 +45,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   late final TabController _tabs;
   late final AnimationController _glowCtrl;
   late final Animation<double> _glow;
-  final _scaffoldKey = GlobalKey<ScaffoldState>(); // <- para abrir o menu lateral
+  final _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // <- para abrir o menu lateral
 
   StreamSubscription<User?>? _authSub;
   String _displayName = 'Usuário';
@@ -68,6 +75,25 @@ class _ProfileScreenState extends State<ProfileScreen>
     return 'Usuário';
   }
 
+  Future<void> _updateDisplayName(String newDisplayName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Atualiza o displayName no FirebaseAuth
+    await user.updateDisplayName(newDisplayName);
+
+    // Agora, atualiza o displayName no Firestore
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'displayName': newDisplayName,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    // Após a atualização, forçamos uma reconstrução da tela para mostrar o novo nome
+    setState(() {
+      _displayName = newDisplayName;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -77,14 +103,17 @@ class _ProfileScreenState extends State<ProfileScreen>
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
     _glow = CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut);
+
     // Nome do usuário logado (Firebase Auth)
     _displayName = _nameFromUser(FirebaseAuth.instance.currentUser);
+
     _authSub = FirebaseAuth.instance.userChanges().listen((u) {
       final newName = _nameFromUser(u);
       if (newName != _displayName) {
         setState(() => _displayName = newName);
       }
     });
+
     // Escuta o doc do usuário em Firestore para tag/foto
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
@@ -93,22 +122,28 @@ class _ProfileScreenState extends State<ProfileScreen>
           .doc(uid)
           .snapshots()
           .listen((snap) {
-        final data = snap.data();
-        if (data != null) {
-          final newTag = (data['tag'] as String?)?.trim();
-          final newPhoto = (data['photoUrl'] as String?)?.trim();
-          bool changed = false;
-          if (newTag != null && newTag.isNotEmpty && newTag != _roleTag) {
-            _roleTag = newTag;
-            changed = true;
-          }
-          if (newPhoto != _photoUrl) {
-            _photoUrl = newPhoto;
-            changed = true;
-          }
-          if (changed) setState(() {});
-        }
-      });
+            final data = snap.data();
+            if (data != null) {
+              final newTag = (data['tag'] as String?)?.trim();
+              final newPhoto = (data['photoUrl'] as String?)?.trim();
+              final newDisplayName = (data['displayName'] as String?)?.trim();
+
+              bool changed = false;
+              if (newTag != null && newTag.isNotEmpty && newTag != _roleTag) {
+                _roleTag = newTag;
+                changed = true;
+              }
+              if (newPhoto != _photoUrl) {
+                _photoUrl = newPhoto;
+                changed = true;
+              }
+              if (newDisplayName != null && newDisplayName != _displayName) {
+                _displayName = newDisplayName;
+                changed = true;
+              }
+              if (changed) setState(() {});
+            }
+          });
     }
   }
 
@@ -126,18 +161,25 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (user == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Você precisa estar logado.'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Você precisa estar logado.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
 
     final picker = ImagePicker();
-    final XFile? picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 75);
+    final XFile? picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 75,
+    );
     if (picked == null) return;
 
     setState(() => _isUploadingPhoto = true);
     try {
-      final String path = 'users/${user.uid}/profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String path =
+          'users/${user.uid}/profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = FirebaseStorage.instance.ref(path);
 
       // Lê os bytes e inicia upload com metadados
@@ -146,7 +188,9 @@ class _ProfileScreenState extends State<ProfileScreen>
       _currentUploadTask = ref.putData(bytes, meta);
 
       // Escuta progresso
-      _uploadSub = _currentUploadTask!.snapshotEvents.listen((TaskSnapshot snap) {
+      _uploadSub = _currentUploadTask!.snapshotEvents.listen((
+        TaskSnapshot snap,
+      ) {
         if (snap.totalBytes > 0) {
           final p = snap.bytesTransferred / snap.totalBytes;
           if (mounted) setState(() => _uploadProgress = p.clamp(0, 1));
@@ -154,31 +198,36 @@ class _ProfileScreenState extends State<ProfileScreen>
       });
 
       // Timeout defensivo para evitar travar indefinidamente
-      final TaskSnapshot snap = await _currentUploadTask!.timeout(const Duration(seconds: 60));
+      final TaskSnapshot snap = await _currentUploadTask!.timeout(
+        const Duration(seconds: 60),
+      );
       final String downloadUrl = await snap.ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
-        {
-          'photoUrl': downloadUrl,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'photoUrl': downloadUrl,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       if (!mounted) return;
       setState(() {
         _photoUrl = downloadUrl;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto de perfil atualizada!'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Foto de perfil atualizada!'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } catch (e) {
       // Cancela upload se ainda estiver em andamento
-      try { await _currentUploadTask?.cancel(); } catch (_) {}
+      try {
+        await _currentUploadTask?.cancel();
+      } catch (_) {}
       if (!mounted) return;
-      final String msg = (e is TimeoutException)
-          ? 'Tempo esgotado ao enviar a foto. Verifique sua conexão e tente novamente.'
-          : 'Falha ao enviar foto: $e';
+      final String msg =
+          (e is TimeoutException)
+              ? 'Tempo esgotado ao enviar a foto. Verifique sua conexão e tente novamente.'
+              : 'Falha ao enviar foto: $e';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
       );
@@ -186,7 +235,11 @@ class _ProfileScreenState extends State<ProfileScreen>
       await _uploadSub?.cancel();
       _uploadSub = null;
       _currentUploadTask = null;
-      if (mounted) setState(() { _isUploadingPhoto = false; _uploadProgress = 0; });
+      if (mounted)
+        setState(() {
+          _isUploadingPhoto = false;
+          _uploadProgress = 0;
+        });
     }
   }
 
@@ -202,10 +255,12 @@ class _ProfileScreenState extends State<ProfileScreen>
         final pillW = w < 480 ? 86.0 : 110.0;
         final pillH = w < 480 ? 32.0 : 38.0;
         final avatarSize = w < 480 ? 160.0 : 190.0; // AVATAR MAIOR
-        final overlap = avatarSize / 3; // quanto o avatar “sai” para fora do card
+        final overlap =
+            avatarSize / 3; // quanto o avatar “sai” para fora do card
 
         final h = MediaQuery.of(context).size.height;
-        final topOffset = h * (82 / 892); // coloca o cabeçalho a ~82px (tela 412x892)
+        final topOffset =
+            h * (82 / 892); // coloca o cabeçalho a ~82px (tela 412x892)
 
         return Scaffold(
           key: _scaffoldKey,
@@ -245,7 +300,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Não há tela anterior para voltar.'),
+                                  content: Text(
+                                    'Não há tela anterior para voltar.',
+                                  ),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -254,7 +311,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           child: const SizedBox(
                             width: 44,
                             height: 44,
-                            child: Icon(Icons.arrow_back, color: kAccent, size: 22),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: kAccent,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ),
@@ -309,7 +370,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         borderRadius: BorderRadius.circular(28),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: kAccent.withOpacity(0.16 + 0.10 * t),
+                                            color: kAccent.withOpacity(
+                                              0.16 + 0.10 * t,
+                                            ),
                                             blurRadius: 26 + 18 * t,
                                             spreadRadius: 6 + 6 * t,
                                           ),
@@ -328,21 +391,32 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   border: Border.all(color: kAccent, width: 3),
                                 ),
                                 clipBehavior: Clip.antiAlias,
-                                child: (_photoUrl != null && _photoUrl!.isNotEmpty)
-                                    ? Image.network(
-                                        _photoUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Center(
-                                          child: Icon(Icons.person, size: 64, color: Colors.white70),
+                                child:
+                                    (_photoUrl != null && _photoUrl!.isNotEmpty)
+                                        ? Image.network(
+                                          _photoUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => const Center(
+                                                child: Icon(
+                                                  Icons.person,
+                                                  size: 64,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                        )
+                                        : Image.asset(
+                                          kAvatarAsset,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => const Center(
+                                                child: Icon(
+                                                  Icons.person,
+                                                  size: 64,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
                                         ),
-                                      )
-                                    : Image.asset(
-                                        kAvatarAsset,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Center(
-                                          child: Icon(Icons.person, size: 64, color: Colors.white70),
-                                        ),
-                                      ),
                               ),
                               Positioned(
                                 right: -6,
@@ -353,11 +427,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   elevation: 4,
                                   child: InkWell(
                                     customBorder: const CircleBorder(),
-                                    onTap: () => _pickAndUploadProfilePhoto(context),
+                                    onTap:
+                                        () =>
+                                            _pickAndUploadProfilePhoto(context),
                                     child: const SizedBox(
                                       width: 36,
                                       height: 36,
-                                      child: Icon(Icons.edit, size: 18, color: Colors.white),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -373,7 +453,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       child: CircularProgressIndicator(
                                         strokeWidth: 3,
                                         color: kAccent,
-                                        value: (_uploadProgress > 0 && _uploadProgress < 1) ? _uploadProgress : null,
+                                        value:
+                                            (_uploadProgress > 0 &&
+                                                    _uploadProgress < 1)
+                                                ? _uploadProgress
+                                                : null,
                                       ),
                                     ),
                                   ),
@@ -420,7 +504,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                       decoration: BoxDecoration(
                         color: const Color(0xFF202634),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFF6C7691), width: 0.5),
+                        border: Border.all(
+                          color: const Color(0xFF6C7691),
+                          width: 0.5,
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black38,
@@ -439,11 +526,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         child: TabBarView(
                           controller: _tabs,
-                          children: const [
-                            _AboutMeTab(),
-                            _StatsTab(),
-                            _LoremTab(),
-                          ],
+                          children: [_AboutMeTab(), _StatsTab(), _LoremTab()],
                         ),
                       ),
                     ),
@@ -472,7 +555,7 @@ class _GearButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: const SizedBox(
-          width: 44,  // ligeiramente maior
+          width: 44, // ligeiramente maior
           height: 44, // ligeiramente maior
           child: Icon(Icons.settings, color: kAccent, size: 22),
         ),
@@ -488,54 +571,28 @@ class _RoleTagPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      height: 23,
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 4,
+      ), // Ajusta o espaçamento interno ao redor do texto
+      decoration: BoxDecoration(
+        color: const Color(0xB2422672), // Cor de fundo da tag
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFAE85E5)), // Cor da borda
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            top: 0,
-            child: Container(
-              width: 72,
-              height: 23,
-              decoration: ShapeDecoration(
-                color: const Color(0xB2422672),
-                shape: RoundedRectangleBorder(
-                  side: const BorderSide(width: 1, color: Color(0xFFAE85E5)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-          const Positioned(
-            left: 5,
-            top: 2,
-            child: SizedBox(
-              width: 62,
-              height: 19,
-              child: null,
-            ),
-          ),
-          Positioned(
-            left: 5,
-            top: 2,
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Color(0xFFBD9EE7),
-                fontSize: 12,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                height: 1.67,
-                letterSpacing: 0.12,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFFBD9EE7), // Cor do texto da tag
+          fontSize: 12,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w500,
+          height: 1.67,
+          letterSpacing: 0.12,
+        ),
+        overflow:
+            TextOverflow
+                .ellipsis, // Garante que o texto não ultrapasse os limites
       ),
     );
   }
@@ -610,17 +667,31 @@ class _SegmentedTabs extends StatelessWidget {
 }
 
 class _AboutMeTab extends StatelessWidget {
-  const _AboutMeTab();
-
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: Text(
-        'Mussum Ipsum, cacilds vidis litro abertis.  Per aumento de cachacis, eu reclamis. '
-        'Si num tem leite então bota uma pinga aí cumpadi! Suco de cevadiss deixa as pessoas '
-        'mais interessantis. A ordem dos tratores não altera o pão duris.',
-        style: TextStyle(fontWeight: FontWeight.w400),
-      ),
+    // Suponha que você tenha o ID do usuário (userId) disponível
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('Informações não encontradas.'));
+        }
+
+        String aboutMe =
+            snapshot.data!.get('aboutMe') ?? 'Sem descrição disponível.';
+
+        return SingleChildScrollView(
+          child: Text(
+            aboutMe,
+            style: const TextStyle(fontWeight: FontWeight.w400),
+          ),
+        );
+      },
     );
   }
 }
@@ -716,29 +787,133 @@ class _ProfileDrawer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           children: [
             ListTile(
-              title: const Text('Perfil', style: TextStyle(fontWeight: FontWeight.w700)),
-              subtitle: const Text('Configurações da sua conta', style: TextStyle(color: Colors.white70)),
-              leading: const CircleAvatar(radius: 18, backgroundColor: kAccent, child: Icon(Icons.person, color: Colors.white, size: 18)),
+              title: const Text(
+                'Perfil',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: const Text(
+                'Configurações da sua conta',
+                style: TextStyle(color: Colors.white70),
+              ),
+              leading: const CircleAvatar(
+                radius: 18,
+                backgroundColor: kAccent,
+                child: Icon(Icons.person, color: Colors.white, size: 18),
+              ),
             ),
             const Divider(),
 
-            _tile(Icons.account_circle, 'Alterar perfil', () => onItemTap('alterar_perfil')),
-            _tile(Icons.alternate_email, 'Alterar e-mail', () => onItemTap('alterar_email')),
-            _tile(Icons.lock, 'Alterar senha', () => onItemTap('alterar_senha')),
-            _tile(Icons.privacy_tip, 'Privacidade', () => onItemTap('privacidade')),
-            _tile(Icons.notifications, 'Notificações', () => onItemTap('notificacoes')),
-            _tile(Icons.palette, 'Preferências de tema', () => onItemTap('tema')),
-            _tile(Icons.language, 'Idioma', () => onItemTap('idioma')),
+            _tile(Icons.account_circle, 'Alterar Perfil', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarProfilePage(),
+                ),
+              );
+            }),
+            _tile(Icons.alternate_email, 'Alterar e-mail', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarEmailPage(),
+                ),
+              );
+            }),
+            _tile(Icons.lock, 'Alterar senha', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarSenhaPage(),
+                ),
+              );
+            }),
+            _tile(Icons.privacy_tip, 'Privacidade', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarPrivacidadePage(),
+                ),
+              );
+            }),
+            _tile(Icons.notifications, 'Notificações', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarNotificacoesPage(),
+                ),
+              );
+            }),
+            _tile(Icons.palette, 'Preferências de tema', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarTemaPage(),
+                ),
+              );
+            }),
+            _tile(Icons.language, 'Idioma', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlterarIdiomaPage(),
+                ),
+              );
+            }),
 
             const Divider(),
-            _tile(Icons.logout, 'Sair', () => onItemTap('sair'), danger: true),
+            _tile(Icons.logout, 'Sair', () {
+              _showLogoutDialog(context); // Exibe o diálogo de confirmação
+            }, danger: true),
           ],
         ),
       ),
     );
   }
 
-  ListTile _tile(IconData icon, String label, VoidCallback onTap, {bool danger = false}) {
+  // Função para exibir o diálogo de confirmação de logout
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Tem certeza que deseja sair?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+              child: const Text('Não', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Realiza o logout
+                await FirebaseAuth.instance.signOut();
+
+                // Fecha o diálogo
+                Navigator.of(context).pop();
+
+                // Redireciona para a tela de login ou home
+                Navigator.push(
+                  context,MaterialPageRoute(
+                  builder: (context) => const LoginPage(),
+                ) 
+                  
+                ); // Altere '/login' para a rota de login
+              },
+              child: const Text('Sim', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ListTile _tile(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    bool danger = false,
+  }) {
     return ListTile(
       leading: Icon(icon, color: danger ? Colors.redAccent : kAccent),
       title: Text(
