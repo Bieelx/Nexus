@@ -3,6 +3,60 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+class _NewsHttp {
+  static final _cache = <String, (DateTime, Map<String, dynamic>)>{};
+  static DateTime? _lastCall;
+  static const _minGap = Duration(milliseconds: 1200); // NewsAPI: ~1 req/seg
+
+  static Future<Map<String, dynamic>> getJson(Uri uri) async {
+    // simple in-memory cache for 10 minutes
+    final key = uri.toString();
+    final now = DateTime.now();
+    final hit = _cache[key];
+    if (hit != null && now.difference(hit.$1) < const Duration(minutes: 10)) {
+      return hit.$2;
+    }
+
+    // respect per-second rate limit
+    final last = _lastCall;
+    if (last != null) {
+      final wait = _minGap - now.difference(last);
+      if (wait > Duration.zero) {
+        await Future.delayed(wait);
+      }
+    }
+
+    final resp = await http.get(uri);
+    _lastCall = DateTime.now();
+
+    if (resp.statusCode == 429) {
+      // Retry-After header (seconds) or backoff default 2.5s, try up to 2 times
+      final retryH = resp.headers['retry-after'];
+      final backoff = Duration(seconds: int.tryParse(retryH ?? '') ?? 3);
+      for (int i = 0; i < 2; i++) {
+        await Future.delayed(backoff + Duration(milliseconds: 200));
+        final r2 = await http.get(uri);
+        _lastCall = DateTime.now();
+        if (r2.statusCode == 200) {
+          final data = jsonDecode(r2.body) as Map<String, dynamic>;
+          _cache[key] = (DateTime.now(), data);
+          return data;
+        }
+      }
+      throw Exception('Limite de requisições atingido (429). Tente novamente em instantes.');
+    }
+
+    if (resp.statusCode != 200) {
+      throw Exception('Falha ao buscar notícias (${resp.statusCode})');
+    }
+
+    final data = jsonDecode(resp.body) as Map<String, dynamic>;
+    _cache[key] = (DateTime.now(), data);
+    return data;
+  }
+}
+
+
 const String _NEWSAPI_KEY = 'a01552b3fd0343a6af71994149bc785c';
 
 class NewsItem {
@@ -140,33 +194,32 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
   }
 
   Future<List<NewsItem>> _fetchAll() async {
-    // Merge das três buscas principais (IA, Lançamentos, Cibersegurança)
-    final futures = <Future<List<NewsItem>>>[
-      _fetchNews(NewsFilter.ia.query),
-      _fetchNews(NewsFilter.lancamentos.query),
-      _fetchNews(NewsFilter.ciberseguranca.query),
-    ];
-    final lists = await Future.wait(futures);
     final merged = <NewsItem>[];
-
     final seen = <String>{};
-    for (final list in lists) {
+    final parts = [
+      NewsFilter.ia.query,
+      NewsFilter.lancamentos.query,
+      NewsFilter.ciberseguranca.query,
+    ];
+    for (final q in parts) {
+      final list = await _fetchNews(q);
       for (final n in list) {
         final key = (n.url?.toLowerCase() ?? n.title.toLowerCase());
         if (seen.add(key)) merged.add(n);
       }
+      // pequena pausa extra entre chamadas para evitar 429
+      await Future.delayed(const Duration(milliseconds: 300));
     }
 
     merged.sort((a, b) {
       final at = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       final bt = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final cmp = bt.compareTo(at); // mais recente primeiro
+      final cmp = bt.compareTo(at);
       if (cmp != 0) return cmp;
-      return (b.points).compareTo(a.points); // desempate por pontos
+      return b.points.compareTo(a.points);
     });
 
     if (merged.isEmpty) {
-      // Fallback global: Top headlines BR (sem filtro) para não retornar vazio em "Todos"
       final uriTop = Uri.parse('https://newsapi.org/v2/top-headlines').replace(queryParameters: {
         'country': 'br',
         'pageSize': '30',
@@ -178,19 +231,10 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
     return merged.take(20).toList();
   }
 
-  Future<Map<String, dynamic>> _getJson(Uri uri) async {
-    final resp = await http.get(uri);
-    if (resp.statusCode != 200) {
-      throw Exception('Falha ao buscar notícias (${resp.statusCode})');
-    }
-    return jsonDecode(resp.body) as Map<String, dynamic>;
-  }
 
   Future<List<NewsItem>> _fetchNews(String q) async {
-    final f = _selected; // usa o filtro atualmente selecionado
+    final f = _selected;
     final qTrim = q.trim();
-
-    // Base 1: everything (mundo inteiro em PT) priorizando título/descrição
     final uriEverything = Uri.parse('https://newsapi.org/v2/everything').replace(
       queryParameters: {
         if (qTrim.isNotEmpty) 'q': qTrim,
@@ -204,7 +248,6 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
     final artAll = await _loadArticles(uriEverything);
     var result = _filterLocal(artAll, f);
 
-    // Se ficou curto, tentamos top-headlines no BR (categoria tecnologia quando fizer sentido)
     if (result.length < 6) {
       final needsTech = f == NewsFilter.ia || f == NewsFilter.ciberseguranca || f == NewsFilter.lancamentos;
       final paramsTop = <String, String>{
@@ -217,12 +260,10 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
       final uriTop = Uri.parse('https://newsapi.org/v2/top-headlines').replace(queryParameters: paramsTop);
       final artTop = await _loadArticles(uriTop);
       final merged = [...result, ..._filterLocal(artTop, f)];
-      // remove duplicados por URL ou título
       final seen = <String>{};
       result = merged.where((n) => seen.add((n.url ?? n.title).toLowerCase())).toList();
     }
 
-    // Ordena por data desc
     result.sort((a, b) {
       final at = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       final bt = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -233,7 +274,7 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
   }
 
   Future<List<NewsItem>> _loadArticles(Uri uri) async {
-    final jsonMap = await _getJson(uri);
+    final jsonMap = await _NewsHttp.getJson(uri);
     final List articles = (jsonMap['articles'] as List? ?? const []);
     return articles.map<NewsItem>((a) {
       final src = (a['source']?['name'] ?? 'Fonte').toString();
@@ -303,7 +344,14 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
                 }
                 if (snap.hasError) {
                   return Center(
-                    child: Text('Não foi possível carregar as notícias agora. Tente novamente em instantes.', style: const TextStyle(color: text)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Não foi possível carregar as notícias agora. ${snap.error}'.replaceAll('Exception: ', ''),
+                        style: const TextStyle(color: text),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   );
                 }
                 final items = snap.data ?? const [];

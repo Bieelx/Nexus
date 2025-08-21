@@ -316,7 +316,7 @@ class _LeakCheckerScreenState extends State<LeakCheckerScreen> {
 
     if (isLeaked) {
       final match = RegExp(r'\((\d+)\s+vezes\)').firstMatch(resultMessage);
-      final countStr = match != null ? match.group(1) : null;
+      final countStr = match?.group(1);
 
       final humanType = selectedType == 'Email'
           ? 'email'
