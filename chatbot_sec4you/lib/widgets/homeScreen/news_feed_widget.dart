@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../service/news_ai_service.dart' as newsai; // Gemini summarizer
 
 class _NewsHttp {
   static final _cache = <String, (DateTime, Map<String, dynamic>)>{};
@@ -53,6 +57,79 @@ class _NewsHttp {
     final data = jsonDecode(resp.body) as Map<String, dynamic>;
     _cache[key] = (DateTime.now(), data);
     return data;
+  }
+}
+
+/// ===== Firestore cache (30 min TTL) =====
+class _NewsCacheItem {
+  final String title;
+  final String? url;
+  final String source;
+  final DateTime? createdAt;
+  final int points;
+
+  _NewsCacheItem({required this.title, this.url, required this.source, this.createdAt, required this.points});
+
+  Map<String, dynamic> toMap() => {
+    'title': title,
+    'url': url,
+    'source': source,
+    'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
+    'points': points,
+  }..removeWhere((k, v) => v == null);
+
+  static _NewsCacheItem fromMap(Map<String, dynamic> m) => _NewsCacheItem(
+    title: (m['title'] ?? '').toString(),
+    url: m['url'] as String?,
+    source: (m['source'] ?? '').toString(),
+    createdAt: m['createdAt'] is Timestamp ? (m['createdAt'] as Timestamp).toDate() : null,
+    points: (m['points'] is int) ? m['points'] as int : int.tryParse('${m['points'] ?? 0}') ?? 0,
+  );
+
+  NewsItem toNewsItem() => NewsItem(title: title, url: url, source: source, createdAt: createdAt, points: points);
+  static _NewsCacheItem fromNewsItem(NewsItem n) => _NewsCacheItem(title: n.title, url: n.url, source: n.source, createdAt: n.createdAt, points: n.points);
+}
+
+class _NewsFirestoreCache {
+  static const _collection = 'news_cache';
+  static const ttl = Duration(minutes: 30);
+
+  static String _docIdFor(NewsFilter f) => switch (f) {
+    NewsFilter.todos => 'todos',
+    NewsFilter.ia => 'ia',
+    NewsFilter.lancamentos => 'lancamentos',
+    NewsFilter.ciberseguranca => 'ciberseguranca',
+  };
+
+  static Future<List<NewsItem>?> read(NewsFilter f) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection(_collection).doc(_docIdFor(f)).get();
+      if (!doc.exists) return null;
+      final data = doc.data()!;
+      final ts = data['updatedAt'];
+      if (ts is! Timestamp) return null;
+      final updated = ts.toDate();
+      if (DateTime.now().difference(updated) > ttl) return null; // stale
+      final List items = (data['items'] as List? ?? const []);
+      return items
+          .whereType<Map<String, dynamic>>()
+          .map((m) => _NewsCacheItem.fromMap(m).toNewsItem())
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> write(NewsFilter f, List<NewsItem> items) async {
+    try {
+      final maps = items.map(_NewsCacheItem.fromNewsItem).map((e) => e.toMap()).toList();
+      await FirebaseFirestore.instance.collection(_collection).doc(_docIdFor(f)).set({
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        'items': maps,
+      }, SetOptions(merge: true));
+    } catch (_) {
+      // ignore cache write errors
+    }
   }
 }
 
@@ -113,7 +190,8 @@ extension on NewsFilter {
 
 class NewsFeedWidget extends StatefulWidget {
   final String query;
-  const NewsFeedWidget({super.key, this.query = 'AI'});
+  final VoidCallback? onSummarizeTap;
+  const NewsFeedWidget({super.key, this.query = 'AI', this.onSummarizeTap});
 
   @override
   State<NewsFeedWidget> createState() => _NewsFeedWidgetState();
@@ -122,6 +200,32 @@ class NewsFeedWidget extends StatefulWidget {
 class _NewsFeedWidgetState extends State<NewsFeedWidget> {
   late Future<List<NewsItem>> _future;
   NewsFilter _selected = NewsFilter.todos;
+  bool _aiLoading = false;
+  List<NewsItem> _lastItems = [];
+  String get _currentFilterLabel => _selected.label;
+
+  Future<List<NewsItem>> _getWithCache(NewsFilter f) async {
+    // 1) try fresh cache
+    final cached = await _NewsFirestoreCache.read(f);
+    if (cached != null && cached.isNotEmpty) {
+      // schedule silent background refresh if cache is close to expiring
+      // (non-blocking)
+      // ignore: unawaited_futures
+      Future(() async {
+        try {
+          final fresh = (f == NewsFilter.todos) ? await _fetchAll() : await _fetchNews(f.query);
+          await _NewsFirestoreCache.write(f, fresh);
+        } catch (_) {}
+      });
+      return cached;
+    }
+
+    // 2) no cache or stale -> fetch now and store
+    final fresh = (f == NewsFilter.todos) ? await _fetchAll() : await _fetchNews(f.query);
+    // persist for next loads
+    await _NewsFirestoreCache.write(f, fresh);
+    return fresh;
+  }
 
   String _norm(String s) {
     final lower = s.toLowerCase();
@@ -297,10 +401,101 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
     }
   }
 
+  Future<void> _onTapSummarizeAI() async {
+    if (_aiLoading) return;
+    setState(() => _aiLoading = true);
+
+    // Abre um loading simples
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    String summary;
+    try {
+      // Converte a lista visível para o formato esperado pelo serviço
+      final itemsForAI = _lastItems.map((n) => newsai.NewsItem(
+        title: n.title,
+        description: null,
+        source: n.source,
+        publishedAt: n.createdAt,
+        url: n.url,
+      )).toList();
+
+      summary = await newsai.NewsAIService.summarize(
+        items: itemsForAI,
+        filterLabel: _currentFilterLabel,
+      );
+    } catch (e) {
+      summary = 'Não consegui gerar o resumo agora. Tente novamente.\n\nDetalhe: $e';
+    } finally {
+      if (mounted) Navigator.of(context).pop(); // fecha o loading
+      if (mounted) setState(() => _aiLoading = false);
+    }
+
+    if (!mounted) return;
+
+    // Exibe resultado
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF2A2F3D),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Resumo da Lua',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  tooltip: 'Copiar',
+                  icon: const Icon(Icons.copy, color: Colors.white70),
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: summary));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Resumo copiado.'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Text(
+                  summary,
+                  style: const TextStyle(color: Colors.white70, height: 1.35),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    _future = _fetchAll();
+    _future = _getWithCache(NewsFilter.todos);
   }
 
   @override
@@ -322,15 +517,57 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Notícias Tech',
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Notícias Tech',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white70, size: 18),
+                tooltip: 'Atualizar agora',
+                onPressed: () async {
+                  setState(() => _future = Future.value(const []));
+                  try {
+                    final fresh = ( _selected == NewsFilter.todos )
+                        ? await _fetchAll()
+                        : await _fetchNews(_selected.query);
+                    await _NewsFirestoreCache.write(_selected, fresh);
+                    if (mounted) setState(() => _future = Future.value(fresh));
+                  } catch (e) {
+                    if (mounted) setState(() => _future = Future.error(e));
+                  }
+                },
+              ),
+              GestureDetector(
+                onTap: widget.onSummarizeTap ?? _onTapSummarizeAI,
+                child: Container(
+                  width: 25,
+                  height: 25,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF6C7691),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: SvgPicture.asset(
+                    'assets/icons/newsAI.svg',
+                    fit: BoxFit.contain,
+                    colorFilter: const ColorFilter.mode(Color(0xFFA259FF), BlendMode.srcIn),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 6),
           _FiltersBar(
             selected: _selected,
             onChanged: (f) {
               setState(() {
                 _selected = f;
-                _future = (f == NewsFilter.todos) ? _fetchAll() : _fetchNews(f.query);
+                _future = _getWithCache(f);
               });
             },
           ),
@@ -355,6 +592,7 @@ class _NewsFeedWidgetState extends State<NewsFeedWidget> {
                   );
                 }
                 final items = snap.data ?? const [];
+                _lastItems = items;
                 if (items.isEmpty) {
                   return const Center(
                     child: Text('Sem resultados agora.', style: TextStyle(color: text)),

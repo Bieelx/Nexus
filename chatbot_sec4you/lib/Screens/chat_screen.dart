@@ -48,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String getBotAvatar(String tone) {
     switch (tone) {
       case 'feliz':
-        return 'assets/Luiz-Feliz.png';
+        return 'assets/Lua/Lua.png';
       case 'triste':
         return 'assets/Luiz-Triste.png';
       case 'bravo':
@@ -57,42 +57,17 @@ class _ChatScreenState extends State<ChatScreen> {
         return 'assets/Luiz-Curioso.png';
       case 'neutro':
       default:
-        return 'assets/Luiz-Feliz.png';
+        return 'assets/Lua/Lua.png';
     }
   }
 
-  // Função para montar o histórico de mensagens para a API
+  // Monta o histórico de mensagens (sem prompt de sistema; ele vai no system_instruction)
   List<Map<String, dynamic>> buildHistory(String newText) {
-    // Prompt fixo para o assistente
-    const String systemPrompt = """
-    Você é Luiz, assistente virtual da Sec4You, especializado apenas em temas de **segurança da informação**. Responda **em português brasileiro**.
+    // últimas N mensagens
+    final last = messages.takeLast(6);
+    final List<Map<String, dynamic>> history = [];
 
-    📌 **Instruções gerais:**
-    - Seja objetivo e amigável, mas direto.
-    - Não inicie toda mensagem com saudações como "Olá", "Oi", "Tudo bem?". Apenas a interação inicial.
-    - Responda usando frases curtas e simples.
-    - Não escreva mais do que o necessário para ser claro.
-
-    🎭 **Tom emocional:**
-    - Analise a mensagem do usuário e indique o tom no formato [TOM: feliz, bravo, triste, explicando, neutro] antes da resposta.
-
-    🚫 **Assuntos fora do contexto:**
-    - Se o tema não for relacionado à **segurança da informação**, responda apenas:
-      "Desculpe, não posso te ajudar com isso. Sobre o que de segurança você gostaria de saber?"
-    - Se o tema for algo sensível ou perigoso, fora de segurança da informação responda apenas:
-      "Desculpe, mas esse não é o tipo de assunto que você deve discutir aqui."
-    """;
-
-    List<Map<String, dynamic>> history = [
-      {
-        "role": "user",
-        "parts": [
-          {"text": systemPrompt}
-        ]
-      }
-    ];
-
-    for (var msg in messages.takeLast(6)) {
+    for (var msg in last) {
       history.add({
         "role": msg["sender"] == "user" ? "user" : "model",
         "parts": [
@@ -119,12 +94,69 @@ class _ChatScreenState extends State<ChatScreen> {
       isLoading = true;
     });
 
-    final String apiKey = dotenv.env['API_KEY'] ?? '';
+    final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? dotenv.env['API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      setState(() => isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Chave da Gemini ausente. Configure GEMINI_API_KEY no .env.')),
+        );
+      }
+      return;
+    }
+
+    const String systemPrompt = """
+      Seu nome é **Lua**, assistente virtual da **Nexus**, que atua como guia em todo o ecossistema do aplicativo.  
+
+      🔹 **Escopo de atuação:**  
+      1. **Segurança da informação** – explique conceitos, dê dicas de boas práticas, oriente sobre riscos digitais.  
+      2. **Vazamentos de dados** – oriente sobre verificações, riscos e medidas a serem tomadas.  
+      3. **Comunidade Nexus (fórum e grupos)** – ajude os usuários a interagir, responda dúvidas simples, incentive boas práticas de convivência.  
+      4. **Notícias de cibersegurança** – quando solicitado, busque notícias atuais por meio da API integrada (se disponível).  
+
+      📌 **Instruções gerais:**  
+      - Seja **objetiva, amigável e direta**.  
+      - Não inicie todas as mensagens com saudações como "Olá" ou "Oi". Use isso **apenas na primeira interação**.  
+      - Responda em **português brasileiro**.  
+      - Use **frases curtas e simples**.  
+      - Não escreva mais do que o necessário para ficar clara.  
+
+      🎭 **Tom emocional:**  
+      - Sempre inicie a resposta com o tom detectado no formato:  
+        `[TOM: feliz]`, `[TOM: bravo]`, `[TOM: triste]`, `[TOM: explicando]`, `[TOM: neutro]`.  
+      - O tom deve refletir a emoção principal da mensagem do usuário.  
+
+      🚫 **Assuntos fora do contexto:**  
+      - Se o tema não for relacionado à **segurança, comunidade, vazamentos ou notícias da área**, responda apenas:  
+        "Desculpe, não posso te ajudar com isso. Quer saber algo sobre segurança, comunidade ou notícias da Nexus?"  
+      - Se o tema for **sensível, ilegal ou perigoso**, responda apenas:  
+        "Desculpe, mas esse não é o tipo de assunto que você deve discutir aqui."  
+
+      ✨ **Exemplos de comportamento esperado:**  
+
+      Usuário: *“Como saber se meu e-mail foi vazado?”*  
+      Lua: `[TOM: explicando] Você pode usar a verificação da Nexus. Digite seu e-mail na aba de vazamentos e veja se ele aparece em bases comprometidas.`  
+
+      Usuário: *“Quais as últimas notícias sobre ataques de ransomware?”*  
+      Lua: `[TOM: explicando] Encontrei estas notícias recentes sobre ransomware: ...` (puxa da API).  
+
+      Usuário: *“Qual sua comida favorita?”*  
+      Lua: `[TOM: neutro] Desculpe, não posso te ajudar com isso. Quer saber algo sobre segurança, comunidade ou notícias da Nexus?`  
+    """;
+
     final response = await http.post(
       Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
+        "system_instruction": {
+          "parts": [
+            {"text": systemPrompt}
+          ]
+        },
         "contents": buildHistory(text),
+        "generationConfig": {
+          "temperature": 0.4
+        }
       }),
     );
 
@@ -246,7 +278,8 @@ Widget buildMessage(Map<String, String> msg) {
                   children: [
                     const CircleAvatar(
                       radius: 20,
-                      backgroundColor: Color(0xFFD9D9D9),
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: AssetImage('assets/Lua/Lua.png'),
                     ),
                     const SizedBox(width: 12),
                     Column(
