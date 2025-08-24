@@ -22,6 +22,17 @@ class _BoardScreenState extends State<BoardScreen> {
     super.initState();
   }
 
+  // Calcula a largura máxima da bolha respeitando avatar (40), gap (8) e margens (16+16)
+  double _calcMaxBubbleWidth(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    const sidePad = 16.0; // margem externa da tela
+    const avatar = 40.0;  // diâmetro do avatar
+    const gap = 8.0;      // espaçamento entre avatar e bolha
+    final available = w - (sidePad + avatar + gap + sidePad);
+    // trava para telas pequenas e mantém estética do Figma (~300px em 412px de largura)
+    return available.clamp(220.0, 320.0);
+  }
+
   void sendPost() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -118,69 +129,82 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// Bolha de mensagem RECEBIDA (alinhada à direita, margem direita 8)
+  /// Bolha de mensagem RECEBIDA (alinhada à esquerda, avatar à esquerda, margem esquerda 16)
   Widget _buildReceivedBubble(Map<String, dynamic> p) {
-    final double maxBubbleW = MediaQuery.of(context).size.width - 16 /*screen right pad*/ - 40 /*avatar*/ - 8 /*gap*/ - 16 /*screen left pad safety*/;
+    final double maxBubbleWidth = _calcMaxBubbleWidth(context);
     final String text = (p['text'] ?? '').toString();
     final String time = _formatTime(p['timestamp']);
     final hasImage = p['image'] != null && p['image'] != '';
     final hasReply = p['replyTo'] != null;
     final String userName = p['userName'] ?? 'Usuário';
 
-    final bubble = Container(
-      constraints: BoxConstraints(maxWidth: maxBubbleW.clamp(180, double.infinity)),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment(0.08, 0.68),
-          end: Alignment(0.59, 0.69),
-          colors: [Color(0xFF6638B6), Color(0xFF634A9E)],
-        ),
-        border: Border.all(color: Color(0xFF6C52BB), width: 1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasReply) _replyPreview(Map<String, dynamic>.from(p['replyTo'])),
-          Text(
-            userName,
-            style: const TextStyle(
-              color: Color(0xFFB3A9D6),
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
+    final bubble = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+      child: IntrinsicWidth( // faz a largura se ajustar ao conteúdo (sem ocupar toda a linha)
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment(0.08, 0.68),
+              end: Alignment(0.59, 0.69),
+              colors: [Color(0xFF6638B6), Color(0xFF634A9E)],
             ),
+            border: const Border.fromBorderSide(BorderSide(color: Color(0xFF6C52BB), width: 1)),
+            borderRadius: BorderRadius.circular(16),
           ),
-          if (hasImage) const SizedBox.shrink(),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Color(0xFFAE85E5),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              time,
-              style: const TextStyle(
-                color: Color(0xFFAD91D4),
-                fontSize: 9,
-                fontStyle: FontStyle.italic,
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // <— encolhe para caber o conteúdo
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasReply) _replyPreview(Map<String, dynamic>.from(p['replyTo'])),
+              Text(
+                userName,
+                style: const TextStyle(
+                  color: Color(0xFFB3A9D6),
+                  fontSize: 10,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                ),
+                softWrap: true,
               ),
-            ),
+              if (hasImage) const SizedBox.shrink(),
+              Text(
+                text,
+                softWrap: true,
+                textWidthBasis: TextWidthBasis.longestLine,
+                style: const TextStyle(
+                  color: Color(0xFFAE85E5),
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  height: 1.83,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  time,
+                  style: const TextStyle(
+                    color: Color(0xFFAD91D4),
+                    fontSize: 9,
+                    fontFamily: 'Poppins',
+                    fontStyle: FontStyle.italic,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
     return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 6, bottom: 6),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 6),
       child: Align(
-        alignment: Alignment.centerRight,
+        alignment: Alignment.centerLeft,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -193,65 +217,78 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// Bolha de mensagem ENVIADA (usuário logado) – alinhada à esquerda, avatar à direita, margem esquerda 8
+  /// Bolha de mensagem ENVIADA (usuário logado) – alinhada à direita, avatar à direita, margem direita 16
   Widget _buildSentBubble(Map<String, dynamic> p) {
-    final double maxBubbleW = MediaQuery.of(context).size.width - 16 /*screen left pad*/ - 40 /*avatar*/ - 8 /*gap*/ - 16 /*screen right pad safety*/;
+    final double maxBubbleWidth = _calcMaxBubbleWidth(context);
     final String text = (p['text'] ?? '').toString();
     final String time = _formatTime(p['timestamp']);
     final hasImage = p['image'] != null && p['image'] != '';
     final hasReply = p['replyTo'] != null;
     final String userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Usuário';
 
-    final bubble = Container(
-      constraints: BoxConstraints(maxWidth: maxBubbleW.clamp(180, double.infinity)),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xAD3251A3),
-        border: Border.all(color: Color(0xFF678EE6), width: 1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasReply) _replyPreview(Map<String, dynamic>.from(p['replyTo'])),
-          Text(
-            userName,
-            style: const TextStyle(
-              color: Color(0xFFB3C2E5),
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
+    final bubble = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+      child: IntrinsicWidth( // faz a largura se ajustar ao conteúdo
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xAD3251A3),
+            border: const Border.fromBorderSide(BorderSide(color: Color(0xFF678EE6), width: 1)),
+            borderRadius: BorderRadius.circular(16),
           ),
-          if (hasImage) const SizedBox.shrink(),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Color(0xFF9AB5EF),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              time,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 9,
-                fontStyle: FontStyle.italic,
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // <— encolhe para caber o conteúdo
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasReply) _replyPreview(Map<String, dynamic>.from(p['replyTo'])),
+              Text(
+                userName,
+                style: const TextStyle(
+                  color: Color(0xFFB3C2E5),
+                  fontSize: 10,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                ),
+                softWrap: true,
               ),
-            ),
+              if (hasImage) const SizedBox.shrink(),
+              Text(
+                text,
+                softWrap: true,
+                textWidthBasis: TextWidthBasis.longestLine,
+                style: const TextStyle(
+                  color: Color(0xFF9AB5EF),
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  height: 1.83,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  time,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 9,
+                    fontFamily: 'Poppins',
+                    fontStyle: FontStyle.italic,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 6, bottom: 6),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 6),
       child: Align(
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.centerRight,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

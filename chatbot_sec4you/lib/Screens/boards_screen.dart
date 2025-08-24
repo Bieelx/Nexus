@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'Subscreens/board_screen.dart';
+import 'Subscreens/group_screen.dart';
 import 'Subscreens/timeline_feed.dart';
 import '../widgets/forum/forum_switcher.dart'; 
 import '../widgets/forum/group_card.dart';

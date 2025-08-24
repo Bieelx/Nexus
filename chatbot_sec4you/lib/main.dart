@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'service/auth_service.dart';
-
 import 'Screens/login_page.dart';
 import 'Screens/home_screen.dart';
 import 'Screens/chat_screen.dart';
@@ -28,7 +27,7 @@ class AuthCheck extends StatelessWidget {
       );
     }
 
-    return auth.usuario != null ? const MainNavigation() : const LoginPage();
+    return auth.usuario != null ? const MainNavigation() : LoginPage();
   }
 }
 

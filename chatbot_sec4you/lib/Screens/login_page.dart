@@ -1,7 +1,6 @@
-import 'package:chatbot_sec4you/auth_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../service/auth_service.dart';
+import 'package:chatbot_sec4you/service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,137 +10,157 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final emailController = TextEditingController();
-  final senhaController = TextEditingController();
-  final nomeController = TextEditingController();
-  final sobrenomeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+  final _senhaCtrl = TextEditingController();
+  final _nomeCtrl = TextEditingController();
+  final _sobrenomeCtrl = TextEditingController();
 
-  bool isLogin = true;
-  String error = '';
+  bool _isRegister = false;
+  bool _loading = false;
 
-  final Color background = const Color(0xFF121212);
-  final Color cardColor = const Color(0xFF1E1E2C);
-  final Color purple = const Color(0xFF9C27B0);
-  final Color textColor = Colors.white70;
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _senhaCtrl.dispose();
+    _nomeCtrl.dispose();
+    _sobrenomeCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _loading = true);
+
+    try {
+      final auth = context.read<AuthService>();
+      if (_isRegister) {
+        await auth.registrar(
+          _emailCtrl.text.trim(),
+          _senhaCtrl.text.trim(),
+          _nomeCtrl.text.trim(),
+          _sobrenomeCtrl.text.trim(),
+        );
+      } else {
+        await auth.login(
+          _emailCtrl.text.trim(),
+          _senhaCtrl.text.trim(),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context);
-
     return Scaffold(
-      backgroundColor: background,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            width: 320,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.lock_person, color: purple, size: 60),
-                const SizedBox(height: 16),
-                Text(
-                  isLogin ? "Bem-vindo de volta!" : "Crie sua conta",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: purple,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (!isLogin) ...[
-                  _buildTextField("Nome", nomeController),
-                  const SizedBox(height: 10),
-                  _buildTextField("Sobrenome", sobrenomeController),
-                  const SizedBox(height: 10),
-                ],
-                _buildTextField("Email", emailController),
-                const SizedBox(height: 10),
-                _buildTextField("Senha", senhaController, obscure: true),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: purple,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+      backgroundColor: const Color(0xFF1E1E1E),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    _isRegister ? 'Criar conta' : 'Entrar',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFA259FF),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
                     ),
-                    onPressed: () async {
-                      String email = emailController.text.trim();
-                      String senha = senhaController.text;
+                  ),
+                  const SizedBox(height: 24),
 
-                      try {
-                        if (isLogin) {
-                          await auth.login(email, senha);
-                        } else {
-                          String nome = nomeController.text;
-                          String sobrenome = sobrenomeController.text;
-                          await auth.registrar(email, senha, nome, sobrenome);
-                        }
-                      } on AuthException catch (e) {
-                        setState(() {
-                          error = e.message;
-                        });
-                      } catch (_) {
-                        setState(() {
-                          error = 'Erro inesperado. Tente novamente.';
-                        });
-                      }
-                    },
-                    icon: Icon(
-                      isLogin ? Icons.login : Icons.person_add,
-                      color: Colors.white,
+                  // Email
+                  TextFormField(
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: _dec('E-mail'),
+                    validator: (v) => (v == null || !v.contains('@'))
+                        ? 'Informe um e-mail válido'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Senha
+                  TextFormField(
+                    controller: _senhaCtrl,
+                    obscureText: true,
+                    decoration: _dec('Senha'),
+                    validator: (v) => (v == null || v.length < 6)
+                        ? 'Mínimo de 6 caracteres'
+                        : null,
+                  ),
+
+                  if (_isRegister) ...[
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _nomeCtrl,
+                      decoration: _dec('Nome'),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Informe o nome'
+                          : null,
                     ),
-                    label: Text(
-                      isLogin ? "Login" : "Cadastrar",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _sobrenomeCtrl,
+                      decoration: _dec('Sobrenome'),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Informe o sobrenome'
+                          : null,
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  ElevatedButton(
+                    onPressed: _loading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFA259FF),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: _loading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(_isRegister ? 'Registrar' : 'Entrar'),
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isLogin = !isLogin;
-                      error = '';
-                    });
-                  },
-                  child: Text(
-                    isLogin
-                        ? 'Novo por aqui? Cadastre-se'
-                        : 'Já tem conta? Faça login',
-                    style: TextStyle(
-                      color: purple,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                if (error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
+
+                  const SizedBox(height: 12),
+
+                  TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () => setState(() => _isRegister = !_isRegister),
                     child: Text(
-                      error,
-                      style: const TextStyle(color: Colors.redAccent),
+                      _isRegister
+                          ? 'Já tem conta? Entrar'
+                          : 'Criar uma conta',
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -149,24 +168,25 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {bool obscure = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      style: TextStyle(color: textColor),
-      decoration: InputDecoration(
-        hintText: label,
-        hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
-        filled: true,
-        fillColor: const Color(0xFF2B2B3B),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+  InputDecoration _dec(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      filled: true,
+      fillColor: const Color(0xFF2A2F3C),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF7884C4)),
       ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF7884C4)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFA259FF), width: 1.6),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     );
   }
 }
