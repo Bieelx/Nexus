@@ -1,50 +1,50 @@
 name: chatbot_sec4you
 description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
   sdk: ^3.7.2
 
-
 dependencies:
   flutter:
     sdk: flutter
+
+  # --- Firebase ---
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.5.3
+  cloud_firestore: ^5.6.7
+  firebase_messaging: ^15.0.0
+  firebase_storage: ^12.3.2
+
+  # --- State / Utils ---
+  provider: ^6.1.2
+  shared_preferences: ^2.2.2
+  device_info_plus: ^10.1.0
+
+  # --- Networking ---
   http: ^1.2.1
   url_launcher: ^6.3.0
-  cupertino_icons: ^1.0.8
-  flutter_dotenv: ^5.2.1
-  langchain: ^0.7.7+2
-  langchain_google: ^0.6.4+2
-  shared_preferences: ^2.2.2
-  image_picker: ^1.0.7
-  firebase_core: ^3.0.0
-  firebase_messaging: ^15.0.0
+
+  # --- Notifications ---
   flutter_local_notifications: ^17.1.2
-  cloud_firestore: ^5.6.7
-  uuid: ^4.3.3
-  provider: ^6.1.2
-  firebase_auth: ^5.5.3
-  dotenv: ^4.2.0
-  device_info_plus: ^10.1.0
-  firebase_storage: ^12.3.2
+
+  # --- Media / Files ---
+  image_picker: ^1.0.7
+
+  # --- UI / Graphics ---
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.9
   vector_math: ^2.1.4
 
+  # --- Env vars ---
+  flutter_dotenv: ^5.2.1
+
+  # --- LLM / AI (opcional) ---
+  langchain: ^0.7.7+2
+  langchain_google: ^0.6.4+2
+
+# NOTE: Removido `dotenv` (puro Dart) para evitar conflito com `flutter_dotenv`.
 
 dev_dependencies:
   flutter_test:
@@ -52,14 +52,16 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
+  uses-material-design: true
   assets:
     - .env
-    - assets/Luiz-Bravo.png
+    - assets/Lua/Lua.png
+    - assets/Lua/Lua-Transparente.png
+    - assets/Lua/Lua-Preocupada.png
     - assets/Luiz-Curioso.png
-    - assets/Luiz-Feliz.png
     - assets/Luiz-Triste.png
     - assets/Luiz-Feliz-Acenando.png
-  uses-material-design: true
+    - assets/icons/newsAI.svg
   fonts:
     - family: Poppins
       fonts:

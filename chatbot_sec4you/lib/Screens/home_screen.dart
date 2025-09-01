@@ -71,8 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Builder(
                         builder: (context) {
                           final media = MediaQuery.of(context);
-                          const desiredTop = 67.0; // distância a partir do topo da tela
-                          const outerLeftPad = 16.0; // já aplicado via Padding do Scaffold
+                          const desiredTop = 67.0; 
+                          const outerLeftPad = 16.0; 
                           final status = media.padding.top;
                           final topGap = (desiredTop - status - outerLeftPad).clamp(0.0, 200.0);
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'service/auth_service.dart';
-
 import 'Screens/login_page.dart';
 import 'Screens/home_screen.dart';
 import 'Screens/chat_screen.dart';
@@ -28,7 +27,7 @@ class AuthCheck extends StatelessWidget {
       );
     }
 
-    return auth.usuario != null ? const MainNavigation() : const LoginPage();
+    return auth.usuario != null ? const MainNavigation() : LoginPage();
   }
 }
 
@@ -120,15 +119,33 @@ class _MainNavigationState extends State<MainNavigation> {
       LeakCheckerScreen(changeTab: _changeTab),
       BoardsScreen(),
       ChatScreen(initialMessage: _autoMessage),
-
     ];
 
-return Scaffold(
-  body: screens[_selectedIndex],
-  bottomNavigationBar: CustomNavBar(
-    currentIndex: _selectedIndex,
-    onTap: _onTabTapped,
-  ),
-);
+    return Scaffold(
+      // permite que o conteúdo "passe por trás" da navbar flutuante
+      extendBody: true,
+      body: Stack(
+        children: [
+          // Conteúdo principal com padding inferior para não ficar escondido
+          Positioned.fill(
+            child: Padding(
+              // ajuste fino se precisar (altura da nav ~56 + respiro)
+              padding: const EdgeInsets.only(bottom: 80),
+              child: screens[_selectedIndex],
+            ),
+          ),
+          // Navbar flutuando como overlay
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: CustomNavBar(
+              currentIndex: _selectedIndex,
+              onTap: _onTabTapped,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
