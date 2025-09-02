@@ -96,3 +96,68 @@ dependencies:
   ```env
   GEMINI_API_KEY=SUA_CHAVE_AQUI
   ```
+### 🏗️ Estrutura do Projeto
+```bash
+lib/
+│
+├── core/                        
+│   ├── auth_exception.dart       
+│   ├── firebase_options.dart     
+│   ├── local_data.dart           
+│   ├── local_user_id.dart        
+│   ├── theme_provider.dart       
+│   └── navbar.dart               
+│
+├── models/                      
+│   └── security_event.dart
+│
+├── service/                     
+│   ├── auth_service.dart         
+│   ├── eventlog_service.dart     
+│   ├── news_ai_service.dart      
+│   ├── security_event_service.dart 
+│   └── firebase_messaging_service.dart 
+│
+├── screens/                     
+│   ├── home_screen.dart
+│   ├── security_alerts_screen_real.dart
+│   ├── security_test_screen.dart
+│   │
+│   └── subscreens/              # Subtelas que compõem o fluxo principal
+│       ├── group_screen.dart     # Grupos e comunidades
+│       ├── timeline_feed.dart    # Timeline estilo Twitter
+│       ├── boards_screen.dart    # Fóruns e discussões
+│       ├── chat_screen.dart      # Chats em tempo real
+│       ├── leak_check_screen.dart# Validação de vazamentos
+│       ├── login_page.dart       # Tela de autenticação
+│       └── profile_page.dart     # Perfil do usuário
+│
+├── widgets/                     
+│   ├── forum/                   
+│   │   ├── forum_switcher.dart
+│   │   └── group_card.dart
+│   │
+│   ├── homeScreen/              
+│   │   ├── news_feed_widget.dart
+│   │   └── notification_card.dart
+│   │
+│   ├── gradient_background.dart
+│   ├── leak_widget.dart
+│   └── security_summary.dart
+│
+├── main.dart                    
+└── navbarNova(beta).dart         
+```
+
+### 🔒 Segurança & Compliance
+- Autenticação com Firebase Auth.
+- Criptografia de senhas com hashing.
+- Monitoramento de dados em conformidade com LGPD e GDPR.
+  
+### 🎯 Roadmap
+- ✅ Timeline social + grupos de chat
+- ✅ IA “Lua” integrada
+- ✅ Validação de dados
+- ✅ Notificações em tempo real
+- 🟡 Cursos e certificações (em desenvolvimento)
+- 🟡 Alertas premium de vazamentos personalizados
