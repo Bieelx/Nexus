@@ -1,4 +1,7 @@
 //Cores do app
+import 'package:chatbot_sec4you/Screens/course_content.dart';
+import 'package:chatbot_sec4you/Screens/course_screen.dart';
+
 import '../../core/theme/app_colors.dart';
 
 //widgets
@@ -144,136 +147,155 @@ class _HomeScreenState extends State<HomeScreen> {
                           const baseH = 162.0;
                           final w = constraints.maxWidth;
                           final scale = w / baseW;
-
-                          return SizedBox(
-                            width: w,
-                            height: baseH * scale,
-                            child: Stack(
-                              children: [
-                                // Título "Continuar curso?"
-                                Positioned(
-                                  left: 0,
-                                  top: 0,
-                                  child: Text(
-                                    'Continuar curso?',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16 * scale,
-                                      fontFamily: 'JetBrainsMono',
-                                      fontWeight: FontWeight.w500,
-                                      height: 1.38,
+                      
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              // Navega para a tela do curso
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => CourseScreen(
+                                    content: CourseContent(
+                                      courseTitle: 'Firewall',         
+                                      moduleTitle: 'Capítulo 5',
+                                      activityTitle: 'Atividade 5',
+                                      description: 'Aprenda sobre firewalls e como configurá-los corretamente.',
+                                      videoId: 'GOAEybxj4bQ',
                                     ),
                                   ),
                                 ),
-                                // Cartão com gradiente (fundo)
-                                Positioned(
-                                  left: 0,
-                                  top: 30 * scale,
-                                  child: Container(
-                                    width: w,
-                                    height: 132 * scale,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        begin: Alignment(0.08, 0.68),
-                                        end: Alignment(0.59, 0.69),
-                                        colors: [Color(0xFF6638B6), Color(0xFF634A9E)],
-                                      ),
-                                      border: Border.all(width: 1, color: Color(0xFF6C52BB)),
-                                      borderRadius: BorderRadius.circular(16 * scale),
-                                    ),
-                                  ),
-                                ),
-                                // Título do curso
-                                Positioned(
-                                  left: 23 * scale,
-                                  top: 60 * scale,
-                                  child: Text(
-                                    'Firewall',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20 * scale,
-                                      fontFamily: 'JetBrainsMono',
-                                      fontWeight: FontWeight.w500,
-                                      height: 1,
-                                      letterSpacing: 0.2 * scale,
-                                    ),
-                                  ),
-                                ),
-                                // Subtítulo
-                                Positioned(
-                                  left: 23 * scale,
-                                  top: 77 * scale,
-                                  child: Text(
-                                    'Capítulo 5',
-                                    style: TextStyle(
-                                      color: Color(0xFFD5C4F3),
-                                      fontSize: 12 * scale,
-                                      fontFamily: 'JetBrainsMono',
-                                      fontWeight: FontWeight.w500,
-                                      height: 1.67,
-                                      letterSpacing: 0.12 * scale,
-                                    ),
-                                  ),
-                                ),
-                                // Barra de progresso - trilho
-                                Positioned(
-                                  left: 19 * scale,
-                                  top: 109 * scale,
-                                  child: Container(
-                                    width: 343 * scale,
-                                    height: 10 * scale,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xAF545252),
-                                      borderRadius: BorderRadius.circular(100 * scale),
-                                    ),
-                                  ),
-                                ),
-                                // Barra de progresso - preenchimento (60%)
-                                Positioned(
-                                  left: 19 * scale,
-                                  top: 109 * scale,
-                                  child: Container(
-                                    width: (343 * 0.60) * scale,
-                                    height: 10 * scale,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF441867),
-                                      borderRadius: BorderRadius.circular(100 * scale),
-                                    ),
-                                  ),
-                                ),
-                                // Texto do progresso
-                                Positioned(
-                                  left: 22 * scale,
-                                  top: 125 * scale,
-                                  child: Text(
-                                    '60% concluído',
-                                    style: TextStyle(
-                                      color: const Color(0xFFAE85E5),
-                                      fontSize: 12 * scale,
-                                      fontFamily: 'JetBrainsMono',
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.83,
-                                    ),
-                                  ),
-                                ),
-                                // Botão circular à direita (decorativo)
-                                Positioned(
-                                  left: 314 * scale,
-                                  top: 53 * scale,
-                                  child: Container(
-                                    width: 45 * scale,
-                                    height: 45 * scale,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        begin: Alignment(0.00, 0.58),
-                                        end: Alignment(1.00, 0.58),
-                                        colors: [Color(0xFF9240FE), Color(0xFF8523F7)],
+                              );
+                            },
+                            child: SizedBox(
+                              width: w,
+                              height: baseH * scale,
+                              child: Stack(
+                                children: [
+                                  // Título "Continuar curso?"
+                                  Positioned(
+                                    left: 0,
+                                    top: 0,
+                                    child: Text(
+                                      'Continuar curso?',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16 * scale,
+                                        fontFamily: 'JetBrainsMono',
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.38,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  // Cartão com gradiente (fundo)
+                                  Positioned(
+                                    left: 0,
+                                    top: 30 * scale,
+                                    child: Container(
+                                      width: w,
+                                      height: 132 * scale,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          begin: Alignment(0.08, 0.68),
+                                          end: Alignment(0.59, 0.69),
+                                          colors: [Color(0xFF6638B6), Color(0xFF634A9E)],
+                                        ),
+                                        border: Border.all(width: 1, color: Color(0xFF6C52BB)),
+                                        borderRadius: BorderRadius.circular(16 * scale),
+                                      ),
+                                    ),
+                                  ),
+                                  // Título do curso
+                                  Positioned(
+                                    left: 23 * scale,
+                                    top: 60 * scale,
+                                    child: Text(
+                                      'Firewall',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20 * scale,
+                                        fontFamily: 'JetBrainsMono',
+                                        fontWeight: FontWeight.w500,
+                                        height: 1,
+                                        letterSpacing: 0.2 * scale,
+                                      ),
+                                    ),
+                                  ),
+                                  // Subtítulo
+                                  Positioned(
+                                    left: 23 * scale,
+                                    top: 77 * scale,
+                                    child: Text(
+                                      'Capítulo 5',
+                                      style: TextStyle(
+                                        color: Color(0xFFD5C4F3),
+                                        fontSize: 12 * scale,
+                                        fontFamily: 'JetBrainsMono',
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.67,
+                                        letterSpacing: 0.12 * scale,
+                                      ),
+                                    ),
+                                  ),
+                                  // Barra de progresso - trilho
+                                  Positioned(
+                                    left: 19 * scale,
+                                    top: 109 * scale,
+                                    child: Container(
+                                      width: 343 * scale,
+                                      height: 10 * scale,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xAF545252),
+                                        borderRadius: BorderRadius.circular(100 * scale),
+                                      ),
+                                    ),
+                                  ),
+                                  // Barra de progresso - preenchimento (60%)
+                                  Positioned(
+                                    left: 19 * scale,
+                                    top: 109 * scale,
+                                    child: Container(
+                                      width: (343 * 0.60) * scale,
+                                      height: 10 * scale,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF441867),
+                                        borderRadius: BorderRadius.circular(100 * scale),
+                                      ),
+                                    ),
+                                  ),
+                                  // Texto do progresso
+                                  Positioned(
+                                    left: 22 * scale,
+                                    top: 125 * scale,
+                                    child: Text(
+                                      '60% concluído',
+                                      style: TextStyle(
+                                        color: const Color(0xFFAE85E5),
+                                        fontSize: 12 * scale,
+                                        fontFamily: 'JetBrainsMono',
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.83,
+                                      ),
+                                    ),
+                                  ),
+                                  // Botão circular à direita (decorativo)
+                                  Positioned(
+                                    left: 314 * scale,
+                                    top: 53 * scale,
+                                    child: Container(
+                                      width: 45 * scale,
+                                      height: 45 * scale,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          begin: Alignment(0.00, 0.58),
+                                          end: Alignment(1.00, 0.58),
+                                          colors: [Color(0xFF9240FE), Color(0xFF8523F7)],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },

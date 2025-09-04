@@ -10,14 +10,6 @@ buildscript {
     }
 }
 
- plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") version "4.4.3" apply false
-
-}
-
 allprojects {
     repositories {
         google()
@@ -25,7 +17,13 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+plugins {
+    id("com.android.application") version "8.8.0" apply false
+    id("com.google.gms.google-services") version "4.4.3" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.25" apply false
+}
+
+val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
@@ -38,7 +36,7 @@ subprojects {
             extensions.findByName("android")?.let { ext ->
                 ext as com.android.build.gradle.BaseExtension
                 if (ext.compileSdkVersion == null) {
-                    ext.compileSdkVersion(34) // ou o valor do seu projeto
+                    ext.compileSdkVersion(34)
                 }
             }
         }
