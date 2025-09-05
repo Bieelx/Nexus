@@ -442,7 +442,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
       // Notificar o autor do post (não notifica a si mesmo)
       try {
         final postSnap = await FirebaseFirestore.instance.collection('posts').doc(widget.postId).get();
-        final postData = postSnap.data() as Map<String, dynamic>?;
+        final postData = postSnap.data();
         final authorId = (postData?['authorId'] ?? '').toString();
 
         if (authorId.isNotEmpty && authorId != user.uid) {

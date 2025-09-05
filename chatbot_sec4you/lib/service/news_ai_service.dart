@@ -97,12 +97,12 @@ ${newsBlock.toString()}
       for (final n in chunk) {
         final t = n.title.toLowerCase();
         String firstSentence;
-        final descSentences = n.description?.split('.')?.toList();
+        final descSentences = n.description?.split('.').toList();
         if (descSentences != null) {
           descSentences.removeWhere((s) => s.trim().isEmpty);
         }
         firstSentence = (descSentences != null && descSentences.isNotEmpty)
-            ? descSentences.first.trim() + '.'
+            ? '${descSentences.first.trim()}.'
             : 'Sem resumo.';
         if (t.contains('lançament') || t.contains('launch')) {
           lanc.add('• **${n.title}** — $firstSentence');
