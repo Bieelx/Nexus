@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.9
   vector_math: ^2.1.4
+  youtube_player_flutter: ^8.1.1
 
   # --- Env vars ---
   flutter_dotenv: ^5.2.1
