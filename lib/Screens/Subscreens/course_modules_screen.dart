@@ -2,65 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nexus_app/service/course_progress_service.dart';
-import 'package:nexus_app/main.dart';
+import 'package:nexus_app/main.dart'; // Usado para o MainNavigation
 import 'package:timeline_tile/timeline_tile.dart';
 
-// =================================================================
-// ESTRUTURAS DE DADOS E FUNÇÕES AUXILIARES
-// =================================================================
-
-class ModuleSeed {
-  final String title;
-  final String description;
-  final int durationMin;
-  final String difficulty;
-  final int xp;
-  final String? pdfAsset;
-
-  const ModuleSeed({
-    required this.title,
-    required this.description,
-    required this.durationMin,
-    required this.difficulty,
-    required this.xp,
-    this.pdfAsset,
-  });
-
-  Map<String, dynamic> toMap(int order) => {
-        'title': title,
-        'description': description,
-        'durationMin': durationMin,
-        'difficulty': difficulty,
-        'xp': xp,
-        'order': order,
-        'createdAt': FieldValue.serverTimestamp(),
-        if (pdfAsset != null) 'pdfAsset': pdfAsset,
-      };
-}
-
-List<ModuleSeed> generateGenericSeeds(String courseId) {
-  final List<ModuleSeed> seeds = [];
-  for (int i = 0; i < 7; i++) {
-    final n = i + 1;
-    seeds.add(ModuleSeed(
-      title: 'Módulo $n: Introdução',
-      description: 'Conteúdo introdutório do curso "$courseId". Conceitos, exemplos e boas práticas.',
-      durationMin: 12,
-      difficulty: 'Fácil',
-      xp: 25,
-      pdfAsset: 'assets/pdfs/$courseId/mod_${n.toString().padLeft(2, '0')}.pdf',
-    ));
-  }
-  seeds.add(ModuleSeed(
-    title: 'Quiz final',
-    description: 'Avalie seu conhecimento com um quiz de 10 perguntas. Concluindo o quiz você desbloqueia o certificado.',
-    durationMin: 5,
-    difficulty: 'Médio',
-    xp: 50,
-    pdfAsset: 'assets/pdfs/$courseId/quiz.pdf',
-  ));
-  return seeds;
-}
+// REMOVIDO: ModuleSeed e generateGenericSeeds
 
 enum ModuleStatus { done, available, locked }
 
@@ -88,27 +33,12 @@ class _CourseModulesScreenState extends State<CourseModulesScreen> {
     super.initState();
     _uid = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
     _progressService = CourseProgressService();
-    _bootstrapCourseIfEmpty();
+    // REMOVIDO: _bootstrapCourseIfEmpty();
     _progressService.updateLastAccessed(
         uid: _uid, courseId: widget.courseId, courseName: widget.courseName);
   }
 
-  Future<void> _bootstrapCourseIfEmpty() async {
-    final modsRef = FirebaseFirestore.instance
-        .collection('courses')
-        .doc(widget.courseId)
-        .collection('modules');
-    final hasAny =
-        await modsRef.limit(1).get().then((snap) => snap.docs.isNotEmpty);
-    if (hasAny) return;
-
-    final seeds = generateGenericSeeds(widget.courseId);
-    final batch = FirebaseFirestore.instance.batch();
-    for (int i = 0; i < seeds.length; i++) {
-      batch.set(modsRef.doc(), seeds[i].toMap(i));
-    }
-    await batch.commit();
-  }
+  // REMOVIDO: Função _bootstrapCourseIfEmpty()
 
   void _toggleEditMode() => setState(() => _editMode = !_editMode);
 
@@ -281,13 +211,16 @@ class _ModuleList extends StatelessWidget {
                 ModuleStatus status;
                 if (completedModules.contains(doc.id)) {
                   status = ModuleStatus.done;
-                } else if (doneCount == moduleOrder) {
+                
+                // ###################### CORREÇÃO DA LÓGICA AQUI ######################
+                } else if (doneCount == (moduleOrder - 1)) {
+                // #####################################################################
                   status = ModuleStatus.available;
                 } else {
                   status = ModuleStatus.locked;
                 }
 
-                // ========== CORREÇÃO 1: Cor da linha ANTES (baseada no módulo ATUAL) ==========
+                // Cor da linha ANTES (baseada no módulo ATUAL)
                 Color beforeLineColor = const Color(0xFF434958);
                 if (status == ModuleStatus.done) {
                   beforeLineColor = const Color(0xFF0FC059);
@@ -295,7 +228,7 @@ class _ModuleList extends StatelessWidget {
                   beforeLineColor = const Color(0xFF8447D6);
                 }
 
-                // ========== CORREÇÃO 2: Cor da linha DEPOIS (baseada no PRÓXIMO módulo) ==========
+                // Cor da linha DEPOIS (baseada no PRÓXIMO módulo)
                 Color afterLineColor = const Color(0xFF434958);
                 if (moduleIndex < modules.length - 1) {
                   final nextDoc = modules[moduleIndex + 1];
@@ -306,7 +239,10 @@ class _ModuleList extends StatelessWidget {
                   ModuleStatus nextStatus;
                   if (completedModules.contains(nextDoc.id)) {
                     nextStatus = ModuleStatus.done;
-                  } else if (doneCount == nextModuleOrder) {
+                  
+                  // ###################### CORREÇÃO DA LÓGICA AQUI ######################
+                  } else if (doneCount == (nextModuleOrder - 1)) {
+                  // #####################################################################
                     nextStatus = ModuleStatus.available;
                   } else {
                     nextStatus = ModuleStatus.locked;
@@ -319,11 +255,10 @@ class _ModuleList extends StatelessWidget {
                   }
                 }
 
-                // ========== CORREÇÃO 3: Cards centralizados com timeline junto ==========
                 return TimelineTile(
                   axis: TimelineAxis.vertical,
                   alignment: TimelineAlign.manual,
-                  lineXY: 0.15, // Posiciona a linha ~15% da esquerda (ajuste conforme necessário)
+                  lineXY: 0.15, 
                   isFirst: moduleIndex == 0,
                   isLast: moduleIndex == modules.length - 1,
 
@@ -342,11 +277,10 @@ class _ModuleList extends StatelessWidget {
                     indicator: _TimelineIndicator(status: status),
                   ),
                   
-                  // Card centralizado no espaço disponível à direita da timeline
                   endChild: Center(
                     child: _buildModuleContent(
                       context, 
-                      doc.id, 
+                      doc.id, // Passa o ID do documento
                       data, 
                       status, 
                       moduleOrder, 
@@ -364,13 +298,12 @@ class _ModuleList extends StatelessWidget {
 
   Widget _buildModuleContent(
       BuildContext context,
-      String docId,
+      String docId, // O ID do módulo (ex: "mod-04")
       Map<String, dynamic> data,
       ModuleStatus status,
       int moduleOrder,
       int total) {
     
-    // Tamanho fixo do card
     const double cardSize = 128.0;
     
     return Padding(
@@ -381,17 +314,20 @@ class _ModuleList extends StatelessWidget {
           _ModuleCard(
             cardSize: cardSize,
             title: data['title'] ?? '',
-            xp: (data['xp'] as num?)?.toInt() ?? 0,
+            xp: (data['xp'] as num?)?.toInt() ?? 0, // Agora vai ler o 25
             status: status,
             onTap: () async {
               if (status != ModuleStatus.available) return;
+              
               final completed = await Navigator.of(context).pushNamed(
                 '/lesson',
                 arguments: {
-                  'title': data['title'],
-                  'assetPath': data['pdfAsset']
+                  'courseId': courseId, 
+                  'moduleId': docId,      
+                  'title': data['title']
                 },
               );
+              
               if (completed == true) {
                 await _markModuleDone(docId, moduleOrder, total);
               }
@@ -400,8 +336,9 @@ class _ModuleList extends StatelessWidget {
           const SizedBox(height: 16),
           _ModuleText(
             title: data['title'] ?? '',
+            // Agora vai ler os dados corretos
             info:
-                '${data['difficulty'] ?? ''} • ${data['durationMin'] ?? 0}min',
+                '${data['difficulty'] ?? 'Básico'} • ${data['durationMin'] ?? 10}min',
             status: status,
           ),
         ],
@@ -411,7 +348,7 @@ class _ModuleList extends StatelessWidget {
 }
 
 // =================================================================
-// WIDGETS DE ESTILO
+// WIDGETS DE ESTILO (Inalterados)
 // =================================================================
 
 class _DashedLine extends StatelessWidget {

@@ -76,19 +76,24 @@ class Sec4YouApp extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
+      // ###################### CORREÇÃO AQUI ######################
       onGenerateRoute: (settings) {
         if (settings.name == '/pdf-viewer' || settings.name == '/lesson') {
-          final args = (settings.arguments as Map?) ?? {};
           return MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (_) => LessonScreen(
-              title: (args['title'] as String?) ?? 'Aula',
-              assetPath: (args['assetPath'] as String?) ?? '',
-            ),
+            // 1. O builder agora chama a função estática
+            //    que já sabe como lidar com os argumentos.
+            builder: LessonScreen.fromRouteArgs,
+            
+            // 2. Você DEVE passar os 'settings' aqui.
+            //    É assim que 'LessonScreen.fromRouteArgs'
+            //    consegue ler os argumentos da rota.
+            settings: settings,
           );
         }
-        return null;
+        return null; // Deixa outras rotas serem tratadas normalmente
       },
+      // ###########################################################
       home: const AuthCheck(),
       debugShowCheckedModeBanner: false,
     );

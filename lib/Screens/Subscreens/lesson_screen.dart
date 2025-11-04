@@ -1,74 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importe o Firestore
+import 'package:flutter_markdown/flutter_markdown.dart';
 
-class PdfReaderScreen extends StatefulWidget {
-  final String title;
-  final String? courseTitle;
-  final String? assetPath;
-  final String? pdfUrl;
+class LessonScreen extends StatefulWidget {
+  // Agora precisamos saber de ONDE carregar os dados
+  final String courseId;
+  final String moduleId;
 
-  const PdfReaderScreen({
+  // O 'title' e 'courseTitle' virão do Firebase
+  // mas podemos recebê-los para exibir enquanto carrega
+  final String? initialTitle; 
+
+  const LessonScreen({
     super.key,
-    required this.title,
-    this.courseTitle,
-    this.assetPath,
-    this.pdfUrl,
+    required this.courseId,
+    required this.moduleId,
+    this.initialTitle,
   });
 
   /// Helper para construir a tela usando argumentos vindos da rota.
   static Widget fromRouteArgs(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map) {
-      return PdfReaderScreen(
-        title: (args['title'] as String?) ?? 'Aula',
-        courseTitle: args['courseTitle'] as String?,
-        assetPath: args['assetPath'] as String?,
-        pdfUrl: args['pdfUrl'] as String?,
+      // Supondo que sua tela anterior (lista de módulos) passe esses IDs
+      return LessonScreen(
+        courseId: args['courseId'] as String? ?? 'seguranca-digital-iniciantes',
+        moduleId: args['moduleId'] as String? ?? 'mod-01',
+        initialTitle: (args['title'] as String?) ?? 'Carregando...',
       );
     }
-    return const PdfReaderScreen(title: 'Aula');
-  }
-
-  @override
-  State<PdfReaderScreen> createState() => _PdfReaderScreenState();
-}
-
-/// Wrapper para compatibilidade: alguns pontos do app referenciam `LessonScreen`.
-/// Agora usamos composição para evitar conflito de generics de StatefulWidget.
-class LessonScreen extends StatelessWidget {
-  final String title;
-  final String? courseTitle;
-  final String? assetPath;
-  final String? pdfUrl;
-
-  const LessonScreen({
-    super.key,
-    required this.title,
-    this.courseTitle,
-    this.assetPath,
-    this.pdfUrl,
-  });
-
-  /// Mantém a mesma conveniência de criar a tela a partir dos argumentos da rota.
-  static Widget fromRouteArgs(BuildContext context) =>
-      PdfReaderScreen.fromRouteArgs(context);
-
-  @override
-  Widget build(BuildContext context) {
-    return PdfReaderScreen(
-      title: title,
-      courseTitle: courseTitle,
-      assetPath: assetPath,
-      pdfUrl: pdfUrl,
+    // Fallback para teste
+    return const LessonScreen(
+      courseId: 'seguranca-digital-iniciantes',
+      moduleId: 'mod-01',
+      initialTitle: 'Carregando...',
     );
   }
+
+  @override
+  State<LessonScreen> createState() => _LessonScreenState();
 }
 
-class _PdfReaderScreenState extends State<PdfReaderScreen> {
-  final PdfViewerController _controller = PdfViewerController();
-  int _page = 1;
-  int _pageCount = 0;
-  bool _docError = false;
+class _LessonScreenState extends State<LessonScreen> {
+  final ScrollController _scrollController = ScrollController();
+  late Future<DocumentSnapshot> _lessonFuture;
+  
+  double _fontSize = 16.0; 
+  bool _isAtEnd = false; 
+
+  @override
+  void initState() {
+    super.initState();
+    // Prepara o Future para buscar o documento do módulo
+    _lessonFuture = FirebaseFirestore.instance
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('modules')
+        .doc(widget.moduleId)
+        .get();
+        
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
+      if (!_isAtEnd) setState(() => _isAtEnd = true);
+    } else {
+      if (_isAtEnd) setState(() => _isAtEnd = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _zoomIn() => setState(() => _fontSize = (_fontSize + 2).clamp(12.0, 28.0));
+  void _zoomOut() => setState(() => _fontSize = (_fontSize - 2).clamp(12.0, 28.0));
 
   @override
   Widget build(BuildContext context) {
@@ -84,149 +94,105 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
         ),
         child: SafeArea(
           bottom: false,
-          child: Column(
-            children: [
-              _Header(title: widget.title, subtitle: widget.courseTitle),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      color: const Color(0xFFFAF9F6),
-                      child: _buildViewer(),
+          child: FutureBuilder<DocumentSnapshot>(
+            // O Future agora busca os dados do Firebase
+            future: _lessonFuture,
+            builder: (context, snapshot) {
+              
+              // Pega os dados do módulo ou usa fallbacks
+              String title = widget.initialTitle ?? 'Carregando...';
+              String markdownContent = '';
+              bool isLoading = true;
+              
+              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                title = data['title'] as String? ?? 'Aula';
+                markdownContent = data['content'] as String? ?? 'Erro: Conteúdo não encontrado.';
+                isLoading = false;
+              } else if (snapshot.hasError) {
+                title = 'Erro';
+                markdownContent = 'Erro ao carregar a aula. Tente novamente.';
+                isLoading = false;
+              }
+              
+              // O build da UI é feito aqui dentro
+              return Column(
+                children: [
+                  _Header(title: title, subtitle: null), // Simplifiquei o Header
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          color: const Color(0xFFFAF9F6), // Fundo "papel"
+                          child: _buildMarkdownViewer(markdownContent, isLoading),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _BottomBar(
-                page: _page,
-                pageCount: _pageCount,
-                onPrev: _page > 1 ? _controller.previousPage : null,
-                onNext: _pageCount == 0
-                    ? null
-                    : () {
-                        if (_page < _pageCount) {
-                          _controller.nextPage();
-                        } else {
-                          // Finalizou a leitura
-                          Navigator.of(context).pop(true);
-                        }
-                      },
-              ),
-              const SizedBox(height: 12),
-            ],
+                  const SizedBox(height: 12),
+                  _BottomBar(
+                    onZoomOut: _zoomOut,
+                    onZoomIn: _zoomIn,
+                    onConcluir: _isAtEnd ? () => Navigator.of(context).pop(true) : null,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildViewer() {
-    if (_docError) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'PDF não disponível.',
-            style: TextStyle(color: Colors.black87),
-            textAlign: TextAlign.center,
+  /// Este widget agora recebe o conteúdo como parâmetro
+  Widget _buildMarkdownViewer(String markdownData, bool isLoading) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (markdownData.startsWith('Erro:')) {
+      return Center(
+        child: Text(markdownData, style: const TextStyle(color: Colors.black87)),
+      );
+    }
+    
+    return Scrollbar(
+      controller: _scrollController,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(20.0), // Padding interno
+        child: MarkdownBody(
+          data: markdownData,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: _fontSize,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+            h1: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontSize: _fontSize + 8,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+            h2: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontSize: _fontSize + 4,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
           ),
         ),
-      );
-    }
-
-    // Força o PDF de teste por padrão
-    final String? asset = widget.assetPath ?? 'assets/pdfs/seguranca-digital/mod_01.pdf';
-    final String? url = widget.pdfUrl;
-
-    print('Starting asset check...');
-    print('Asset path: $asset');
-    if (asset != null && asset.isNotEmpty) {
-      print('Loading PDF from asset: $asset');
-      return _NoScrollOverlay(
-        child: SfPdfViewer.asset(
-          asset,
-          controller: _controller,
-          pageLayoutMode: PdfPageLayoutMode.single,
-          pageSpacing: 0, // remove espaço entre páginas
-          initialZoomLevel: 1.40, // dá um zoom para "preencher" melhor
-          enableTextSelection: false,
-          enableDoubleTapZooming: false,
-          canShowScrollHead: false,
-          canShowPaginationDialog: false,
-          canShowScrollStatus: false,
-          onDocumentLoaded: (details) {
-            print('Document loaded with ${details.document.pages.count} pages');
-            setState(() {
-              _pageCount = details.document.pages.count;
-              _page = _controller.pageNumber;
-            });
-          },
-          onPageChanged: (details) {
-            setState(() => _page = details.newPageNumber);
-          },
-          onDocumentLoadFailed: (error) {
-            print('Document load failed with error: $error');
-            print('Asset load failed: $asset, error: $error');
-            setState(() {
-              _docError = true;
-              print('_docError set to true');
-            });
-          },
-        ),
-      );
-    }
-
-    print('Starting pdfUrl check...');
-    print('pdfUrl: $url');
-    if (url != null && url.isNotEmpty) {
-      print('Loading PDF from network: $url');
-      return _NoScrollOverlay(
-        child: SfPdfViewer.network(
-          url,
-          controller: _controller,
-          pageLayoutMode: PdfPageLayoutMode.single,
-          pageSpacing: 0,
-          initialZoomLevel: 1.40,
-          enableTextSelection: false,
-          enableDoubleTapZooming: false,
-          canShowScrollHead: false,
-          canShowPaginationDialog: false,
-          canShowScrollStatus: false,
-          onDocumentLoaded: (details) {
-            print('Document loaded with ${details.document.pages.count} pages');
-            setState(() {
-              _pageCount = details.document.pages.count;
-              _page = _controller.pageNumber;
-            });
-          },
-          onPageChanged: (details) {
-            setState(() => _page = details.newPageNumber);
-          },
-          onDocumentLoadFailed: (error) {
-            print('Document load failed with error: $error');
-            print('Network load failed: $url, error: $error');
-            setState(() {
-              _docError = true;
-              print('_docError set to true');
-            });
-          },
-        ),
-      );
-    }
-
-    print('Falling back: PDF não disponível para esta aula. Asset: $asset, Url: $url');
-    return const Center(
-      child: Text(
-        'PDF não disponível para esta aula.',
-        style: TextStyle(color: Colors.black87),
       ),
     );
   }
 }
+
+// ==========================================================
+// Widgets de UI (Sem alteração da sua versão anterior)
+// =O HEADER FOI SIMPLIFICADO PORQUE O FUTUREBUILDER O CONTROLA
+// ==========================================================
 
 class _Header extends StatelessWidget {
   final String title;
@@ -235,9 +201,10 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mantive sua lógica de padding complexa
     final media = MediaQuery.of(context);
-    final statusBar = media.padding.top; // SafeArea already applies this
-    const desiredTop = 68.0;            // target distance from very top
+    final statusBar = media.padding.top;
+    const desiredTop = 68.0; 
     final double topPad = (desiredTop - statusBar).clamp(0.0, 200.0).toDouble();
 
     return Padding(
@@ -301,22 +268,18 @@ class _BackButton extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  final int page;
-  final int pageCount;
-  final VoidCallback? onPrev;
-  final VoidCallback? onNext;
+  final VoidCallback? onZoomOut;
+  final VoidCallback? onZoomIn;
+  final VoidCallback? onConcluir;
 
   const _BottomBar({
-    required this.page,
-    required this.pageCount,
-    this.onPrev,
-    this.onNext,
+    this.onZoomOut,
+    this.onZoomIn,
+    this.onConcluir,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isLast = pageCount > 0 && page >= pageCount;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -328,11 +291,17 @@ class _BottomBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            _roundButton(Icons.chevron_left, onPrev),
-            const SizedBox(width: 16),
-            Expanded(child: _pageIndicator(page, pageCount)),
-            const SizedBox(width: 16),
-            _primaryButton(isLast ? 'Concluir' : 'Próximo', onNext),
+            _roundButton(Icons.remove, onZoomOut), 
+            const SizedBox(width: 8),
+            _roundButton(Icons.add, onZoomIn), 
+            const SizedBox(width: 8),
+            const Icon(Icons.format_size, color: Colors.white70, size: 20),
+            const Spacer(), 
+            _primaryButton(
+              'Concluir', 
+              onConcluir,
+              isEnabled: onConcluir != null 
+            ),
           ],
         ),
       ),
@@ -355,24 +324,30 @@ class _BottomBar extends StatelessWidget {
     );
   }
 
-  Widget _primaryButton(String label, VoidCallback? onTap) {
+  Widget _primaryButton(String label, VoidCallback? onTap, {bool isEnabled = true}) {
+    const activeGradient = LinearGradient(
+      begin: Alignment(0.00, 0.83),
+      end: Alignment(0.84, 0.37),
+      colors: [
+        Color(0xFFAE85E5),
+        Color(0xFF8447D6),
+        Color(0xFF572698),
+      ],
+    );
+    const disabledGradient = LinearGradient(
+      colors: [Color(0xFF6f6f6f), Color(0xFF6f6f6f)],
+    );
+
     return InkWell(
-      onTap: onTap,
+      onTap: onTap, 
       borderRadius: BorderRadius.circular(16),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         width: 110,
         height: 39,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            begin: Alignment(0.00, 0.83),
-            end: Alignment(0.84, 0.37),
-            colors: [
-              Color(0xFFAE85E5),
-              Color(0xFF8447D6),
-              Color(0xFF572698),
-            ],
-          ),
+          gradient: isEnabled ? activeGradient : disabledGradient,
         ),
         alignment: Alignment.center,
         child: Text(
@@ -386,60 +361,6 @@ class _BottomBar extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _pageIndicator(int page, int total) {
-    // Para PDFs grandes, exiba "X/Y"
-    if (total > 6 || total == 0) {
-      return Center(
-        child: Text(
-          total == 0 ? ' ' : '$page / $total',
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      );
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(total, (i) {
-        final active = (i + 1) == page;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: active ? 12 : 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: active ? const Color(0xFFAE85E5) : const Color(0xFF6C52BB),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _NoScrollOverlay extends StatelessWidget {
-  final Widget child;
-  const _NoScrollOverlay({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        // Captura gestos de arraste para impedir scroll manual entre páginas
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: (_) {},
-            onHorizontalDragUpdate: (_) {},
-            onHorizontalDragEnd: (_) {},
-            onVerticalDragStart: (_) {},
-            onVerticalDragUpdate: (_) {},
-            onVerticalDragEnd: (_) {},
-          ),
-        ),
-      ],
     );
   }
 }
