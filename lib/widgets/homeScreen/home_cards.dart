@@ -12,18 +12,23 @@ import '../../service/xp_service.dart';
 
 class NotificationSummaryCard extends StatelessWidget {
   final VoidCallback? onTap;
-  const NotificationSummaryCard({super.key, this.onTap});
+  final double width;
+  final double height;
+
+  const NotificationSummaryCard({
+    super.key, 
+    this.onTap,
+    required this.width,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
-    const double cardWidth = 178.0;
-    const double cardHeight = 171.0;
     const Color bgBlue = Color(0xAD3251A3);
     const Color borderBlue = Color(0xFF678EE6);
     const Color titleBlue = Color(0xFF9AB5EF);
 
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
-
     final stream = uid == null
         ? Stream.value(0)
         : FirebaseFirestore.instance.collection('users').doc(uid).snapshots().map((doc) {
@@ -33,8 +38,8 @@ class NotificationSummaryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: cardWidth,
-        height: cardHeight,
+        width: width, // Usa o tamanho calculado
+        height: height, // Usa o tamanho calculado
         decoration: BoxDecoration(
           color: bgBlue,
           borderRadius: BorderRadius.circular(16),
@@ -79,7 +84,14 @@ class NotificationSummaryCard extends StatelessWidget {
 // ================================================================
 
 class StreaksWidget extends StatefulWidget {
-  const StreaksWidget({super.key});
+  final double width;
+  final double height;
+  
+  const StreaksWidget({
+    super.key,
+    required this.width,
+    required this.height,
+  });
 
   @override
   State<StreaksWidget> createState() => _StreaksWidgetState();
@@ -101,38 +113,28 @@ class _StreaksWidgetState extends State<StreaksWidget> {
 
   Future<void> _registerStreak(int currentStreak, DateTime? lastCheckIn) async {
     if (_uid == null) return;
-
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     int newStreakCount = 1;
-
     if (lastCheckIn != null) {
       final yesterday = today.subtract(const Duration(days: 1));
-      if (lastCheckIn == yesterday) {
-        newStreakCount = currentStreak + 1;
-      }
+      if (lastCheckIn == yesterday) newStreakCount = currentStreak + 1;
     }
-
     await FirebaseFirestore.instance.collection('streaks').doc(_uid).set({
       'streakCount': newStreakCount,
       'lastCheckIn': Timestamp.fromDate(today),
     });
-
     await XpService().addXp(_uid!, 25);
   }
 
   @override
   Widget build(BuildContext context) {
-    const double cardWidth = 178.0;
-    const double cardHeight = 171.0;
-
     return StreamBuilder<DocumentSnapshot>(
       stream: _streakStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(width: cardWidth, height: cardHeight, alignment: Alignment.center, child: const CircularProgressIndicator());
+          return Container(width: widget.width, height: widget.height, alignment: Alignment.center, child: const CircularProgressIndicator());
         }
-
         int streakCount = 0;
         DateTime? lastCheckIn;
         if (snapshot.hasData && snapshot.data!.exists) {
@@ -140,7 +142,6 @@ class _StreaksWidgetState extends State<StreaksWidget> {
           streakCount = data['streakCount'] ?? 0;
           lastCheckIn = (data['lastCheckIn'] as Timestamp?)?.toDate();
         }
-
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
         final bool isRegisteredToday = lastCheckIn == today;
@@ -153,21 +154,15 @@ class _StreaksWidgetState extends State<StreaksWidget> {
   }
 
   Widget _buildUnregisteredCard(int streakCount, DateTime? lastCheckIn) {
-    const cardWidth = 178.0;
-    const cardHeight = 171.0;
     const Color bgColor = Color(0xFF434958);
     const Color borderColor = Color(0xFF72D08A);
     const Color buttonBgColor = Color(0xB24F8347);
 
     return Container(
-      width: cardWidth,
-      height: cardHeight,
+      width: widget.width, // Usa o tamanho calculado
+      height: widget.height, // Usa o tamanho calculado
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -177,8 +172,7 @@ class _StreaksWidgetState extends State<StreaksWidget> {
           OutlinedButton(
             onPressed: () => _registerStreak(streakCount, lastCheckIn),
             style: OutlinedButton.styleFrom(
-              backgroundColor: buttonBgColor,
-              side: const BorderSide(color: borderColor),
+              backgroundColor: buttonBgColor, side: const BorderSide(color: borderColor),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               padding: const EdgeInsets.symmetric(horizontal: 16),
             ),
@@ -190,21 +184,15 @@ class _StreaksWidgetState extends State<StreaksWidget> {
   }
 
   Widget _buildRegisteredCard(int streakCount, DateTime? lastCheckIn) {
-    const cardWidth = 178.0;
-    const cardHeight = 171.0;
     const Color bgColor = Color(0xB24F8347);
     const Color borderColor = Color(0xFF72D08A);
     const Color streakColor = Color(0xFF43D660);
 
     return Container(
-      width: cardWidth,
-      height: cardHeight,
+      width: widget.width, // Usa o tamanho calculado
+      height: widget.height, // Usa o tamanho calculado
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -219,37 +207,19 @@ class _StreaksWidgetState extends State<StreaksWidget> {
 
   Widget _buildWeekDays(int streakCount, DateTime? lastCheckIn) {
     final List<String> weekDayInitials = DateFormat.E('pt_BR').dateSymbols.SHORTWEEKDAYS.map((d) => d.toUpperCase()[0]).toList();
-    // Reordena para começar com Domingo (D S T Q Q S S)
-    final orderedWeekDays = [
-      weekDayInitials[0], // Dom
-      weekDayInitials[1], // Seg
-      weekDayInitials[2], // Ter
-      weekDayInitials[3], // Qua
-      weekDayInitials[4], // Qui
-      weekDayInitials[5], // Sex
-      weekDayInitials[6], // Sab
-    ];
-
-    final todayWeekday = DateTime.now().weekday % 7; // Domingo é 7, então 7%7=0. Sábado é 6.
+    final orderedWeekDays = [weekDayInitials[0], weekDayInitials[1], weekDayInitials[2], weekDayInitials[3], weekDayInitials[4], weekDayInitials[5], weekDayInitials[6]];
+    final todayWeekday = DateTime.now().weekday % 7;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(7, (index) {
         final int dayDifference = todayWeekday - index;
         final bool isActive = dayDifference >= 0 && dayDifference < streakCount;
-        
         return Container(
-          width: 18,
-          height: 18,
-          decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF73D18A) : const Color(0xFF6C7691),
-            shape: BoxShape.circle,
-          ),
+          width: 18, height: 18,
+          decoration: BoxDecoration(color: isActive ? const Color(0xFF73D18A) : const Color(0xFF6C7691), shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: Text(
-            orderedWeekDays[index],
-            style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
-          ),
+          child: Text(orderedWeekDays[index], style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
         );
       }),
     );

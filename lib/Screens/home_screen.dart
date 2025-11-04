@@ -10,10 +10,11 @@ import '../service/course_progress_service.dart';
 import 'profile_page.dart';
 import 'course_selection.dart';
 import 'Subscreens/course_modules_screen.dart';
+import 'quiz_intro_screen.dart'; // ADICIONADO: Import da nova tela de Quiz
 
-// Widgets - ATUALIZE ESTE IMPORT
+// Widgets
 import '../widgets/homeScreen/news_feed_widget.dart';
-import '../widgets/homeScreen/home_cards.dart'; // Importa os novos cards
+import '../widgets/homeScreen/home_cards.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,13 +46,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double topSpacing = MediaQuery.of(context).size.height * (68 / 892);
+    // --- LÓGICA DE RESPONSIVIDADE ---
+    final size = MediaQuery.of(context).size;
+    
+    const double figmaWidth = 412.0;
+    const double figmaHeight = 892.0;
+    const double horizontalPadding = 16.0;
+
+    final double widthRatio = size.width / figmaWidth;
+
+    const double smallCardFigmaWidth = 178.0;
+    const double smallCardFigmaHeight = 171.0;
+    final double smallCardWidth = smallCardFigmaWidth * widthRatio;
+    final double smallCardHeight = smallCardFigmaHeight * widthRatio;
+    
+    final double newsCardWidth = size.width - (horizontalPadding * 2);
+    final double newsCardHeight = newsCardWidth * (233 / 380);
+
+    final double topSpacing = size.height * (68 / figmaHeight);
+    // ------------------------------------
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: firstName == null
               ? const Center(child: CircularProgressIndicator())
               : Column(
@@ -61,19 +80,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildHeader(context),
                     const SizedBox(height: 24),
                     _buildCourseCard(),
+                    
+                    // ADICIONADO: Card do Quiz
                     const SizedBox(height: 24),
-                    // Linha com os cards de Notificação e Frequência
+                    _buildFeaturedQuizCard(context), 
+                    
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        // WIDGETS ATUALIZADOS
-                        NotificationSummaryCard(),
-                        StreaksWidget(),
+                      children: [
+                        NotificationSummaryCard(
+                          width: smallCardWidth,
+                          height: smallCardHeight,
+                        ),
+                        StreaksWidget(
+                          width: smallCardWidth,
+                          height: smallCardHeight,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    NewsFeedWidget(),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 16), 
+                    NewsFeedWidget(
+                      width: newsCardWidth,
+                      height: newsCardHeight,
+                    ),
+                    const SizedBox(height: 120),
                   ],
                 ),
         ),
@@ -147,13 +178,75 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
+  // NOVO WIDGET PARA O CARD DO QUIZ
+  Widget _buildFeaturedQuizCard(BuildContext context) {
+    // !! IMPORTANTE !!
+    // Troque estes IDs pelos IDs reais do seu Firestore
+    // para o módulo de quiz que você quer destacar
+    const String featuredCourseId = "seguranca-digital"; 
+    const String featuredModuleId = "quiz_final"; // (Este ID é um exemplo, use o ID do seu documento)
+
+    return Material(
+      color: const Color(0xFF171B27),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => QuizIntroScreen(
+
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF6B7691)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quiz Rápido', 
+                      style: TextStyle(color: Color(0xFFAE85E5), fontSize: 20, fontWeight: FontWeight.bold)
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Teste seus conhecimentos e ganhe XP!', 
+                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 16),
+              Container(
+                width: 50, height: 50,
+                decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryPurple),
+                child: const Icon(Icons.quiz_outlined, color: Colors.white, size: 28),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+// ================================================================
+// WIDGETS AUXILIARES (CARD DE CURSO)
+// ================================================================
 
 class _ContinueCourseCard extends StatelessWidget {
   final String uid;
   final String courseId;
   final String courseName;
-
   const _ContinueCourseCard({required this.uid, required this.courseId, required this.courseName});
 
   @override
@@ -165,52 +258,34 @@ class _ContinueCourseCard extends StatelessWidget {
         if (!snapshot.hasData) {
             return const _PlaceholderCourseCard(isLoading: true);
         }
-
         final progress = snapshot.data!;
         final percent = (progress.progress * 100).round();
         final currentChapter = progress.completed.length + 1;
-
         return Material(
           color: const Color(0xFF492F71),
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => CourseModulesScreen(courseId: courseId, courseName: courseName)),
-              );
-            },
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CourseModulesScreen(courseId: courseId, courseName: courseName))),
             borderRadius: BorderRadius.circular(16),
             child: Container(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(courseName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text('Capítulo $currentChapter', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        width: 50, height: 50,
-                        decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryPurple),
-                        child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
-                      )
-                    ],
-                  ),
+                  Row(children: [
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(courseName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('Capítulo $currentChapter', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
+                    ])),
+                    const SizedBox(width: 16),
+                    Container(width: 50, height: 50, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryPurple), child: const Icon(Icons.play_arrow, color: Colors.white, size: 32)),
+                  ]),
                   const SizedBox(height: 20),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
-                      value: progress.progress,
-                      minHeight: 10,
+                      value: progress.progress, minHeight: 10,
                       backgroundColor: Colors.black.withOpacity(0.3),
                       valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF331F4D)),
                     ),
