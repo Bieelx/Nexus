@@ -207,7 +207,7 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 32), // Espaço do topo
+                const SizedBox(height: 16), // Espaço do topo (reduzido de 32 para 16)
                 Text(
                   'Pergunta ${_currentQuestionIndex + 1} de ${_questions.length}',
                   textAlign: TextAlign.start,
@@ -218,7 +218,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8), // Reduzido de 12 para 8
                 // Barra de Progresso
                 ClipRRect(
                   borderRadius: BorderRadius.circular(100),
@@ -229,7 +229,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFAE85E5)),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 20), // Reduzido de 28 para 20
                 // Pergunta
                 Container(
                   width: double.infinity,
@@ -266,7 +266,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 16), // Reduzido de 28 para 16
                 // Opções
                 ...List.generate(question.options.length, (index) {
                   final letter = String.fromCharCode('A'.codeUnitAt(0) + index);
@@ -286,12 +286,12 @@ class _QuizScreenState extends State<QuizScreen> {
                 const Spacer(),
                 // Botão de Confirmação / Feedback
                 _ConfirmButton(
-                  status: !_answerChecked 
+                  status: !_answerChecked
                     ? (_selectedOptionIndex != null ? _ButtonStatus.selected : _ButtonStatus.normal)
                     : (isCorrect ? _ButtonStatus.correct : _ButtonStatus.incorrect),
                   onTap: _checkAnswer,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16), // Reduzido de 24 para 16
               ],
             ),
           );
@@ -415,14 +415,14 @@ class _OptionTile extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 10.0), // Reduzido de 12 para 10
       child: InkWell(
         onTap: showResult ? null : onTap,
         borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           width: double.infinity,
-          height: 65,
+          height: 60, // Reduzido de 65 para 60
           decoration: ShapeDecoration(
             color: bgColor,
             shape: RoundedRectangleBorder(

@@ -172,13 +172,36 @@ class _PostCardState extends State<_PostCard> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(userId: widget.authorId)));
                   }
                 },
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundImage: _resolvedAuthorPhotoUrl != null && _resolvedAuthorPhotoUrl!.isNotEmpty ? NetworkImage(_resolvedAuthorPhotoUrl!) : null,
-                  backgroundColor: AppColors.primaryPurple,
-                  child: (_resolvedAuthorPhotoUrl == null || _resolvedAuthorPhotoUrl!.isEmpty)
-                      ? Text(_initials(_resolvedAuthorName), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-                      : null,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryPurple,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: (_resolvedAuthorPhotoUrl != null && _resolvedAuthorPhotoUrl!.isNotEmpty)
+                      ? (_resolvedAuthorPhotoUrl!.startsWith('assets/')
+                          ? Image.asset(
+                              _resolvedAuthorPhotoUrl!,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                            )
+                          : Image.network(
+                              _resolvedAuthorPhotoUrl!,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              errorBuilder: (_, __, ___) => Text(
+                                _initials(_resolvedAuthorName),
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ))
+                      : Center(
+                          child: Text(
+                            _initials(_resolvedAuthorName),
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -404,7 +427,29 @@ class _CommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(radius: 14, backgroundImage: authorPhotoUrl.isNotEmpty ? NetworkImage(authorPhotoUrl) : null),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primaryPurple,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: authorPhotoUrl.isNotEmpty
+                ? (authorPhotoUrl.startsWith('assets/')
+                    ? Image.asset(
+                        authorPhotoUrl,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      )
+                    : Image.network(
+                        authorPhotoUrl,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 14, color: Colors.white),
+                      ))
+                : const Icon(Icons.person, size: 14, color: Colors.white),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

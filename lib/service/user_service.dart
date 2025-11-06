@@ -14,7 +14,7 @@ class UserService {
   Stream<String?> get photoUrlStream {
     final uid = currentUid;
     if (uid == null) return const Stream.empty();
-    return _firestore.collection('usuarios').doc(uid).snapshots().map(
+    return _firestore.collection('users').doc(uid).snapshots().map(
       (snapshot) => snapshot.data()?['photoUrl'] as String?,
     );
   }
@@ -23,14 +23,14 @@ class UserService {
   Future<void> updatePhotoUrl(String newUrl) async {
     final uid = currentUid;
     if (uid == null) throw Exception('Usuário não autenticado');
-    await _firestore.collection('usuarios').doc(uid).update({'photoUrl': newUrl});
+    await _firestore.collection('users').doc(uid).update({'photoUrl': newUrl});
   }
 
   /// Retorna um stream em tempo real de todos os dados do usuário.
   Stream<Map<String, dynamic>?> get userDataStream {
     final uid = currentUid;
     if (uid == null) return const Stream.empty();
-    return _firestore.collection('usuarios').doc(uid).snapshots().map(
+    return _firestore.collection('users').doc(uid).snapshots().map(
       (snapshot) => snapshot.data(),
     );
   }
@@ -39,6 +39,6 @@ class UserService {
   Future<void> updateUserFields(Map<String, dynamic> fields) async {
     final uid = currentUid;
     if (uid == null) throw Exception('Usuário não autenticado');
-    await _firestore.collection('usuarios').doc(uid).update(fields);
+    await _firestore.collection('users').doc(uid).update(fields);
   }
 }

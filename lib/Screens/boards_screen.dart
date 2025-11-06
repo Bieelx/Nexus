@@ -74,19 +74,23 @@ class _BoardsScreenState extends State<BoardsScreen> {
       ),
       floatingActionButton: _showGroups
           ? null
-          : FloatingActionButton.extended(
-              onPressed: _openCreatePostSheet,
-              backgroundColor: AppColors.primaryPurple,
-              icon: const Icon(Icons.edit, color: Colors.white),
-              label: const Text(
-                'Postar',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 70.0),
+              child: FloatingActionButton.extended(
+                onPressed: _openCreatePostSheet,
+                backgroundColor: AppColors.primaryPurple,
+                icon: const Icon(Icons.edit, color: Colors.white),
+                label: const Text(
+                  'Postar',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

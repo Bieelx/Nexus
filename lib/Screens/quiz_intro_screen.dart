@@ -22,7 +22,7 @@ class QuizIntroScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent, // Deixa o gradiente da main aparecer
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,13 +44,13 @@ class QuizIntroScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(flex: 1),
-              
+              const SizedBox(height: 40),
+
               // 2. Ícone de Troféu
-              _TrophyIcon(),
-              
+              Center(child: _TrophyIcon()),
+
               const SizedBox(height: 32),
-              
+
               // 3. Textos (Atualizados)
               const Text(
                 'Desafio Rápido', // <-- MUDADO
@@ -78,8 +78,8 @@ class QuizIntroScreen extends StatelessWidget {
 
               // 4. Card de Informações (Atualizado)
               _InfoCard(),
-              
-              const Spacer(flex: 2),
+
+              const SizedBox(height: 40),
 
               // 5. Botões
               _QuizButton(
@@ -109,7 +109,7 @@ class QuizIntroScreen extends StatelessWidget {
                                 );
                               },
                             ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
             ],
           ),
         ),

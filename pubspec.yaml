@@ -24,7 +24,7 @@ dependencies:
   device_info_plus: ^12.1.0
   speech_to_text: ^7.3.0
   flutter_inappwebview: ^6.0.0
-  flutter_tts: ^4.2.3
+  # flutter_tts: ^4.2.0  # Temporariamente desabilitado (erro CMake no Windows)
   just_audio: ^0.10.5
   timeline_tile: ^2.0.0
   avatar_glow: ^3.0.1
@@ -73,7 +73,6 @@ flutter:
     - assets/Lua/Lua-Curiosa.png
     - assets/Lua/Lua-muito-surpresa.png
     - assets/icons/newsAI.svg
-    - assets/lessons/
     - assets/pdfs/seguranca-digital/
     - assets/Lua/icones-perfil/icone1.png
     - assets/Lua/icones-perfil/icone2.png

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:nexus_app/Screens/login_page.dart';
 import 'package:nexus_app/service/xp_service.dart';
+import 'package:nexus_app/service/user_service.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarEmailPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarIdiomaPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarNotificacoesPage.dart';
@@ -12,6 +13,7 @@ import 'package:nexus_app/Screens/Subscreens/Profile/AlterarPrivacidadePage.dart
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarSenhaPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarTemaPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/alterar_Profile_Page.dart';
+import 'package:nexus_app/Screens/Subscreens/Profile/avatar_selection_screen.dart';
 
 
 const kAccent = Color(0xFFA259FF);
@@ -160,19 +162,58 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   Widget _buildAvatar(String? photoUrl) {
     return Center(
-      child: Container(
-        width: 110,
-        height: 110,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kAccentDark, width: 3),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: (photoUrl != null && photoUrl.isNotEmpty)
-            ? (photoUrl.startsWith('assets/')
-                ? Image.asset(photoUrl, fit: BoxFit.cover)
-                : Image.network(photoUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 50, color: kTextSecondary)))
-            : const Icon(Icons.person, size: 50, color: kTextSecondary),
+      child: Stack(
+        children: [
+          Container(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: kAccentDark, width: 3),
+              color: kCard,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: (photoUrl != null && photoUrl.isNotEmpty)
+                ? (photoUrl.startsWith('assets/')
+                    ? Image.asset(
+                        photoUrl,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      )
+                    : Image.network(
+                        photoUrl,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 50, color: kTextSecondary),
+                      ))
+                : const Icon(Icons.person, size: 50, color: kTextSecondary),
+          ),
+          if (_isOwnProfile)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AvatarSelectionScreen(
+                      currentPhotoUrl: photoUrl,
+                    ),
+                  ),
+                ),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: kAccent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: kBgGradient[0], width: 2),
+                  ),
+                  child: const Icon(Icons.edit, color: Colors.white, size: 18),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

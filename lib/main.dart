@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'service/auth_service.dart';
 import 'Screens/login_page.dart';
 import 'Screens/home_screen.dart';
-import 'Screens/chat_screen.dart';
+import 'Screens/chat_screen.dart'; // ChatScreenRestoredMessages está aqui
 import 'Screens/course_selection.dart';
-import 'Screens/leak_check_screen.dart';
+import 'Screens/leak_check_screen_enhanced.dart';
 import 'Screens/boards_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -100,6 +100,9 @@ class Sec4YouApp extends StatelessWidget {
   }
 }
 
+// GlobalKey para acessar o MainNavigation de qualquer lugar
+final GlobalKey<_MainNavigationState> mainNavigationKey = GlobalKey<_MainNavigationState>();
+
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
 
@@ -112,7 +115,7 @@ class AuthCheck extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        return auth.usuario != null ? const MainNavigation() : LoginPage();
+        return auth.usuario != null ? MainNavigation(key: mainNavigationKey) : LoginPage();
       },
     );
   }
@@ -128,6 +131,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
   String _autoMessage = '';
+  int _chatKey = 0; // Para forçar rebuild do chat
 
   // A lista de telas é definida uma vez para melhor performance
   late final List<Widget> _screens;
@@ -138,10 +142,24 @@ class _MainNavigationState extends State<MainNavigation> {
     _screens = [
       HomeScreen(),
       CourseSelectionScreen(onBackToHome: () => _onTabTapped(0)),
-      LeakCheckerScreen(changeTab: _openChatWithAutoMessage),
+      LeakCheckerScreenEnhanced(changeTab: _openChatWithAutoMessage),
       const BoardsScreen(),
-      ChatScreen(initialMessage: _autoMessage),
+      ChatScreen(key: ValueKey(_chatKey), initialMessage: _autoMessage),
     ];
+  }
+
+  // Método público para restaurar conversa (chamado via GlobalKey)
+  void restoreConversation(List<ChatMessage> messages) {
+    setState(() {
+      _chatKey++; // Incrementa para forçar rebuild
+      _selectedIndex = 4; // Muda para tab do chat
+      _screens[4] = ChatScreen(
+        key: ValueKey(_chatKey),
+        initialMessage: _autoMessage,
+        restoredMessages: messages,
+      );
+    });
+    debugPrint('🔄 Restaurando conversa com ${messages.length} mensagens');
   }
 
   void _onTabTapped(int index) {
@@ -161,8 +179,6 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    _screens[4] = ChatScreen(initialMessage: _autoMessage);
-
     return Scaffold(
       extendBody: true,
       bottomNavigationBar: CustomNavBar(

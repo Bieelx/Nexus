@@ -134,11 +134,28 @@ class _HomeScreenState extends State<HomeScreen> {
             stream: UserService().photoUrlStream,
             builder: (context, snapshot) {
               final photoUrl = snapshot.data;
-              return CircleAvatar(
-                radius: 22,
-                backgroundImage: (photoUrl != null && photoUrl.isNotEmpty) ? NetworkImage(photoUrl) : null,
-                backgroundColor: AppColors.primaryPurple,
-                child: (photoUrl == null || photoUrl.isEmpty) ? const Icon(Icons.person, size: 24, color: Colors.white) : null,
+              return Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primaryPurple,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: (photoUrl != null && photoUrl.isNotEmpty)
+                    ? (photoUrl.startsWith('assets/')
+                        ? Image.asset(
+                            photoUrl,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
+                          )
+                        : Image.network(
+                            photoUrl,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 24, color: Colors.white),
+                          ))
+                    : const Icon(Icons.person, size: 24, color: Colors.white),
               );
             },
           ),
