@@ -14,7 +14,7 @@ import 'package:nexus_app/Screens/Subscreens/Profile/AlterarSenhaPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/AlterarTemaPage.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/alterar_Profile_Page.dart';
 import 'package:nexus_app/Screens/Subscreens/Profile/avatar_selection_screen.dart';
-
+import 'package:nexus_app/Screens/Subscreens/Profile/fale_conosco_page.dart';
 
 const kAccent = Color(0xFFA259FF);
 const kAccentLight = Color(0xFFAE85E5);
@@ -493,6 +493,7 @@ class _ProfileDrawer extends StatelessWidget {
             _tile(Icons.notifications, 'Notificações', () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AlterarNotificacoesPage()))),
             _tile(Icons.palette, 'Preferências de tema', () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AlterarTemaPage()))),
             _tile(Icons.language, 'Idioma', () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AlterarIdiomaPage()))),
+            _tile(Icons.support_agent, 'Fale Conosco', () => Navigator.push(context, MaterialPageRoute(builder: (context) => FaleConoscoPage()))),
             const Divider(),
             _tile(Icons.logout, 'Sair', () => _showLogoutDialog(context), danger: true),
           ],
