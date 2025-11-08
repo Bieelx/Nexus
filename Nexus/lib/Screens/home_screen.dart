@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/theme/app_colors.dart';
 import '../service/user_service.dart';
-import '../service/course_progress_service.dart';
+import '../service/course_progress_service.dart'; 
 
 // Telas
 import 'profile_page.dart';

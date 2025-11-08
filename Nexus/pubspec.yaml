@@ -63,15 +63,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - .env
     - assets/Lua/Lua.png
     - assets/Lua/Lua-Transparente.png
     - assets/Lua/Lua-Preocupada.png
     - assets/Lua/Lua-Curiosa.png
     - assets/Lua/Lua-muito-surpresa.png
     - assets/icons/newsAI.svg
-    - assets/pdfs/
-    - assets/pdfs/seguranca-digital/
     - assets/Lua/icones-perfil/icone1.png
     - assets/Lua/icones-perfil/icone2.png
     - assets/Lua/icones-perfil/icone3.png

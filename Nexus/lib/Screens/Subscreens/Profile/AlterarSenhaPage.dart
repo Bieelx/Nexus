@@ -186,12 +186,12 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
                     _changePassword();
                   }
                 },
-                child: const Text('Salvar Alterações'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: kText,
                   backgroundColor: kAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: const Text('Salvar Alterações'),
               ),
             ],
           ),

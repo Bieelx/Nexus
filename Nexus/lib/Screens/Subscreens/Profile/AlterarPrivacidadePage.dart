@@ -102,7 +102,7 @@ class _AlterarPrivacidadePageState extends State<AlterarPrivacidadePage> {
                   _isProfilePublic = value;
                 });
               },
-              activeColor: kAccent,
+              activeThumbColor: kAccent,
               activeTrackColor: kAccent.withOpacity(0.6),
               inactiveThumbColor: Colors.grey,
               inactiveTrackColor: Colors.grey.withOpacity(0.4),
@@ -113,12 +113,12 @@ class _AlterarPrivacidadePageState extends State<AlterarPrivacidadePage> {
             // Botão para salvar as alterações
             ElevatedButton(
               onPressed: _savePrivacySettings,
-              child: const Text('Salvar Alterações'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: kText,
                 backgroundColor: kAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('Salvar Alterações'),
             ),
           ],
         ),

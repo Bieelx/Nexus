@@ -105,7 +105,7 @@ class _AlterarTemaPageState extends State<AlterarTemaPage> {
                   _isDarkMode = value;
                 });
               },
-              activeColor: kAccent,
+              activeThumbColor: kAccent,
               activeTrackColor: kAccent.withOpacity(0.6),
               inactiveThumbColor: Colors.grey,
               inactiveTrackColor: Colors.grey.withOpacity(0.4),
@@ -116,12 +116,12 @@ class _AlterarTemaPageState extends State<AlterarTemaPage> {
             // Botão para salvar as alterações
             ElevatedButton(
               onPressed: _saveThemeSettings,
-              child: const Text('Salvar Alterações'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: kText,
                 backgroundColor: kAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('Salvar Alterações'),
             ),
           ],
         ),

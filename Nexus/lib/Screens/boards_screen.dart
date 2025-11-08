@@ -1,10 +1,10 @@
+asdfasdfasdf;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Subscreens/group_screen.dart';
 import 'Subscreens/timeline_feed.dart';
-import '../widgets/forum/forum_switcher.dart';
-import '../widgets/forum/group_card.dart';
+import '../widgets/forum/group_card.dart'; // O GroupCard que você me enviou
 import '../core/theme/app_colors.dart';
 
 class BoardsScreen extends StatefulWidget {
@@ -15,8 +15,10 @@ class BoardsScreen extends StatefulWidget {
 }
 
 class _BoardsScreenState extends State<BoardsScreen> {
-  bool _showGroups = true;
+  // O switcher foi removido, então 'showGroups' será sempre 'true'
+  bool _showGroups = true; 
 
+  // Esta função não é mais chamada, mas pode ficar aqui
   void _onSwitcherChanged(bool showGroups) {
     setState(() {
       _showGroups = showGroups;
@@ -58,13 +60,23 @@ class _BoardsScreenState extends State<BoardsScreen> {
       ),
       body: Column(
         children: [
-          ForumSwitcher(
-            showGroups: _showGroups,
-            onChanged: _onSwitcherChanged,
+          
+          // --- SWITCHER REMOVIDO ---
+          /*
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: _NewForumSwitcher(
+              showGroups: _showGroups,
+              onChanged: _onSwitcherChanged,
+            ),
           ),
+          */
+          // --- FIM DA REMOÇÃO ---
+
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
+              // Como _showGroups é sempre true, isso sempre mostrará _GroupsListView
               child: _showGroups
                   ? const _GroupsListView(key: ValueKey('groups'))
                   : const TimelineFeed(key: ValueKey('timeline')),
@@ -283,5 +295,155 @@ class _GroupTheme {
     if (key.contains('gamer')) return const _GroupTheme(gradient: [Color(0xFF6638B6), Color(0xFF634A9E)], border: Color(0xFF6C52BB));
     if (key.contains('ciber')) return const _GroupTheme(gradient: [Color(0xFF834748), Color(0xFF5E3334)], border: Color(0xFFD07274));
     return const _GroupTheme(gradient: [Color(0xFF6638B6), Color(0xFF634A9E)], border: Color(0xFF6C52BB));
+  }
+}
+
+// =================================================================
+// O SWITCHER ABAIXO NÃO ESTÁ SENDO USADO, MAS FOI DEIXADO AQUI
+// =================================================================
+
+class _NewForumSwitcher extends StatelessWidget {
+  final bool showGroups;
+  final ValueChanged<bool> onChanged;
+
+  const _NewForumSwitcher({
+    required this.showGroups,
+    required this.onChanged,
+  });
+
+  // Cores baseadas no seu design do Figma (class Switcher)
+  static const backgroundColor = Color(0xFF3F4968);
+  static const activeGradient = LinearGradient(
+    begin: Alignment(0.00, 0.50),
+    end: Alignment(1.00, 0.50),
+    colors: [Color(0xFFA259FF), Color(0xFF8447D6)], // Seu gradiente roxo
+  );
+  
+  // Cores de texto (ATIVO = branco, INATIVO = cinza claro, baseado no SEU print)
+  static const activeTextColor = Colors.white;
+  // Corrigido: O Figma dizia preto, mas seu print mostra um cinza/branco
+  static const inactiveTextColor = Color(0xFFC6C5C3); 
+
+  @override
+  Widget build(BuildContext context) {
+    // Pega a largura da tela, menos os paddings (16*2)
+    final double screenWidth = MediaQuery.of(context).size.width - 32;
+    // O Figma usou 380, mas vamos usar a largura real para ser responsivo
+    
+    return Container(
+      width: screenWidth,
+      height: 33, // Altura do seu design do Figma
+      padding: const EdgeInsets.all(3), // Padding para o botão interno
+      decoration: ShapeDecoration(
+        color: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      // Usamos um Stack para colocar a "pílula" ativa por baixo
+      child: Stack(
+        children: [
+          // Pílula ativa (que se move)
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            // Alinha à esquerda (Timeline) ou à direita (Grupos)
+            alignment: showGroups ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              // O Figma usou 190, que é metade de 380.
+              // Vamos usar metade da largura - o padding
+              width: (screenWidth - 6) / 2,
+              height: 27, // 33 de altura - (3*2 de padding)
+              decoration: ShapeDecoration(
+                gradient: activeGradient,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
+
+          // Botões (por cima da pílula)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: _SwitcherButton(
+                  text: 'Timelinexx',
+                  icon: Icons.chat_bubble_outline,
+                  isActive: !showGroups, // Ativo se showGroups for FALSO
+                  activeColor: activeTextColor,
+                  inactiveColor: inactiveTextColor,
+                  onTap: () {
+                    onChanged(false); // Manda 'false' para o parent
+                  },
+                ),
+              ),
+              Expanded(
+                child: _SwitcherButton(
+                  text: 'Grupos',
+                  icon: Icons.people_outline,
+                  isActive: showGroups, // Ativo se showGroups for VERDADEIRO
+                  activeColor: activeTextColor,
+                  inactiveColor: inactiveTextColor,
+                  onTap: () {
+                    onChanged(true); // Manda 'true' para o parent
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Widget de botão (agora sem fundo, só o conteúdo)
+class _SwitcherButton extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  const _SwitcherButton({
+    required this.text,
+    required this.icon,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Define a cor do texto e do ícone
+    final Color color = isActive ? activeColor : inactiveColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque, // Garante que o clique pegue no 'Expanded'
+      child: SizedBox(
+        height: 27, // Mesma altura da pílula
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 16, // Fonte 16 do Figma
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

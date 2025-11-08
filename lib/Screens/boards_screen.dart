@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Subscreens/group_screen.dart';
 import 'Subscreens/timeline_feed.dart';
-import '../widgets/forum/forum_switcher.dart';
 import '../widgets/forum/group_card.dart';
 import '../core/theme/app_colors.dart';
 
@@ -37,6 +36,8 @@ class _BoardsScreenState extends State<BoardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const double kBottomNavBarHeight = 92.0;
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(100),
@@ -58,9 +59,12 @@ class _BoardsScreenState extends State<BoardsScreen> {
       ),
       body: Column(
         children: [
-          ForumSwitcher(
-            showGroups: _showGroups,
-            onChanged: _onSwitcherChanged,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: _NewForumSwitcher(
+              showGroups: _showGroups,
+              onChanged: _onSwitcherChanged,
+            ),
           ),
           Expanded(
             child: AnimatedSwitcher(
@@ -74,24 +78,44 @@ class _BoardsScreenState extends State<BoardsScreen> {
       ),
       floatingActionButton: _showGroups
           ? null
-          : Padding(
-              padding: const EdgeInsets.only(bottom: 70.0),
-              child: FloatingActionButton.extended(
-                onPressed: _openCreatePostSheet,
-                backgroundColor: AppColors.primaryPurple,
-                icon: const Icon(Icons.edit, color: Colors.white),
-                label: const Text(
-                  'Postar',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  onPressed: _openCreatePostSheet,
+                  backgroundColor: AppColors.primaryPurple,
+                  icon: const Icon(Icons.edit, color: Colors.white),
+                  label: const Text(
+                    'Postar',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: kBottomNavBarHeight), 
+              ],
             ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+}
+
+// --- CLASSE AUXILIAR PARA DEFINIR ÍCONES E CORES ---
+class GroupDisplayInfo {
+  final IconData iconData;
+  final Color backgroundColor;
+
+  const GroupDisplayInfo({required this.iconData, required this.backgroundColor});
+
+  static GroupDisplayInfo fromId(String id) {
+    final key = id.toLowerCase();
+    if (key.contains('geral')) return const GroupDisplayInfo(iconData: Icons.tag, backgroundColor: Color(0xFF58B038)); // Verde
+    if (key.contains('dev')) return const GroupDisplayInfo(iconData: Icons.code, backgroundColor: Color(0xFF4C8DFF)); // Azul
+    if (key.contains('gamer')) return const GroupDisplayInfo(iconData: Icons.gamepad_outlined, backgroundColor: Color(0xFFFFCC00)); // Amarelo
+    if (key.contains('ciber')) return const GroupDisplayInfo(iconData: Icons.security_outlined, backgroundColor: Color(0xFFFF3B30)); // Vermelho
+    if (key.contains('duvida')) return const GroupDisplayInfo(iconData: Icons.help_outline, backgroundColor: Color(0xFF6C52BB)); // Roxo
+    return const GroupDisplayInfo(iconData: Icons.forum_outlined, backgroundColor: Color(0xFFA259FF)); 
   }
 }
 
@@ -115,16 +139,21 @@ class _GroupsListView extends StatelessWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 110),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final doc = docs[index];
             final data = doc.data();
+            
             final name = data['name'] as String? ?? 'Grupo sem nome';
             final description = data['description'] as String? ?? 'Sem descrição';
             final lastMessage = data['lastMessage'] as String? ?? '';
             final preview = lastMessage.isNotEmpty ? lastMessage : description;
-            final theme = _GroupTheme.fromId(doc.id);
+            
+            final memberCount = (data['memberCount'] as int?) ?? 0;
+            final postCount = (data['postCount'] as int?) ?? 0;
+            
+            final displayInfo = GroupDisplayInfo.fromId(doc.id);
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -133,14 +162,24 @@ class _GroupsListView extends StatelessWidget {
                 description: description,
                 lastMessageUser: 'User',
                 lastMessageText: preview,
-                gradient: theme.gradient,
-                borderColor: theme.border,
                 onEnter: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => BoardScreen(boardId: doc.id, boardName: name)),
+                    MaterialPageRoute(builder: (_) => BoardScreen(
+                      boardId: doc.id, 
+                      boardName: name,
+                      // ###################### CORREÇÃO AQUI ######################
+                      // Passando os dados do ícone para a próxima tela
+                      iconData: displayInfo.iconData,
+                      iconBackgroundColor: displayInfo.backgroundColor,
+                      // ###########################################################
+                    )),
                   );
                 },
+                iconData: displayInfo.iconData,
+                iconBackgroundColor: displayInfo.backgroundColor,
+                memberCount: memberCount,
+                postCount: postCount,
               ),
             );
           },
@@ -150,6 +189,8 @@ class _GroupsListView extends StatelessWidget {
   }
 }
 
+// ... (Resto do arquivo: _CreatePostSheet, _NewForumSwitcher, _SwitcherButton...)
+// ... (COLE O RESTO DO SEU ARQUIVO boards_screen.dart AQUI)
 class _CreatePostSheet extends StatefulWidget {
   const _CreatePostSheet();
 
@@ -274,18 +315,133 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   }
 }
 
-class _GroupTheme {
-  final List<Color> gradient;
-  final Color border;
+class _NewForumSwitcher extends StatelessWidget {
+  final bool showGroups;
+  final ValueChanged<bool> onChanged;
 
-  const _GroupTheme({required this.gradient, required this.border});
+  const _NewForumSwitcher({
+    required this.showGroups,
+    required this.onChanged,
+  });
 
-  static _GroupTheme fromId(String id) {
-    final key = id.toLowerCase();
-    if (key.contains('geral')) return const _GroupTheme(gradient: [Color(0xFF3251A3), Color(0xFF2E3F7A)], border: Color(0xFF678EE6));
-    if (key.contains('duvida')) return const _GroupTheme(gradient: [Color(0xFF2E8B57), Color(0xFF236C44)], border: Color(0xFF58C08A));
-    if (key.contains('gamer')) return const _GroupTheme(gradient: [Color(0xFF6638B6), Color(0xFF634A9E)], border: Color(0xFF6C52BB));
-    if (key.contains('ciber')) return const _GroupTheme(gradient: [Color(0xFF834748), Color(0xFF5E3334)], border: Color(0xFFD07274));
-    return const _GroupTheme(gradient: [Color(0xFF6638B6), Color(0xFF634A9E)], border: Color(0xFF6C52BB));
+  static const backgroundColor = Color(0xFF3F4968);
+  static const activeGradient = LinearGradient(
+    begin: Alignment(0.00, 0.50),
+    end: Alignment(1.00, 0.50),
+    colors: [Color(0xFFA259FF), Color(0xFF8447D6)],
+  );
+  static const activeTextColor = Colors.white;
+  static const inactiveTextColor = Color(0xFFC6C5C3); 
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width - 32;
+    
+    return Container(
+      width: screenWidth,
+      height: 33,
+      padding: const EdgeInsets.all(3),
+      decoration: ShapeDecoration(
+        color: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            alignment: showGroups ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              width: (screenWidth - 6) / 2,
+              height: 27,
+              decoration: ShapeDecoration(
+                gradient: activeGradient,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: _SwitcherButton(
+                  text: 'Timeline',
+                  icon: Icons.chat_bubble_outline,
+                  isActive: !showGroups,
+                  activeColor: activeTextColor,
+                  inactiveColor: inactiveTextColor,
+                  onTap: () {
+                    onChanged(false);
+                  },
+                ),
+              ),
+              Expanded(
+                child: _SwitcherButton(
+                  text: 'Grupos',
+                  icon: Icons.people_outline,
+                  isActive: showGroups,
+                  activeColor: activeTextColor,
+                  inactiveColor: inactiveTextColor,
+                  onTap: () {
+                    onChanged(true);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwitcherButton extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  const _SwitcherButton({
+    required this.text,
+    required this.icon,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = isActive ? activeColor : inactiveColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 27,
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -9,6 +9,10 @@ class TimelineFeed extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Vamos calcular a altura da navbar + safe area + o próprio FAB
+    // para que o último item da lista possa rolar para cima
+    const double bottomClearance = 170.0; // Ajuste este valor se necessário
+
     final postsRef = FirebaseFirestore.instance
         .collection('posts')
         .where('parentId', isNull: true)
@@ -31,7 +35,8 @@ class TimelineFeed extends StatelessWidget {
         return ListView.separated(
           itemCount: docs.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          // CORREÇÃO DO PADDING INFERIOR:
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, bottomClearance),
           itemBuilder: (context, index) {
             final snap = docs[index];
             final data = snap.data();
@@ -54,7 +59,6 @@ class TimelineFeed extends StatelessWidget {
             final uid = FirebaseAuth.instance.currentUser?.uid;
             final isLiked = uid != null && likedBy.contains(uid);
 
-            // Passamos apenas o ID, o Card se encarrega de buscar os dados do autor
             return _PostCard(
               postId: snap.id,
               authorId: authorId,
@@ -98,7 +102,6 @@ class _PostCardState extends State<_PostCard> {
     _resolveAuthorData();
   }
 
-  // Lógica para buscar os dados do autor sempre a partir da coleção 'users'
   Future<void> _resolveAuthorData() async {
     if (widget.authorId == null) return;
     try {
@@ -113,6 +116,7 @@ class _PostCardState extends State<_PostCard> {
         setState(() {
           _resolvedAuthorName = fullName.isNotEmpty ? fullName : 'Usuário';
           _resolvedUsername = username;
+          // Corrigido: 'authorPhotoUrl' -> 'photoUrl' para bater com seu DB
           _resolvedAuthorPhotoUrl = data['photoUrl'] as String?;
         });
       }
@@ -137,7 +141,6 @@ class _PostCardState extends State<_PostCard> {
     });
   }
 
-  // FUNÇÃO DE COMENTÁRIOS RESTAURADA
   Future<void> _openComments(BuildContext context) async {
     showModalBottomSheet(
       context: context,
@@ -172,36 +175,13 @@ class _PostCardState extends State<_PostCard> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(userId: widget.authorId)));
                   }
                 },
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primaryPurple,
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: (_resolvedAuthorPhotoUrl != null && _resolvedAuthorPhotoUrl!.isNotEmpty)
-                      ? (_resolvedAuthorPhotoUrl!.startsWith('assets/')
-                          ? Image.asset(
-                              _resolvedAuthorPhotoUrl!,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                            )
-                          : Image.network(
-                              _resolvedAuthorPhotoUrl!,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                              errorBuilder: (_, __, ___) => Text(
-                                _initials(_resolvedAuthorName),
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                            ))
-                      : Center(
-                          child: Text(
-                            _initials(_resolvedAuthorName),
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: _resolvedAuthorPhotoUrl != null && _resolvedAuthorPhotoUrl!.isNotEmpty ? NetworkImage(_resolvedAuthorPhotoUrl!) : null,
+                  backgroundColor: AppColors.primaryPurple,
+                  child: (_resolvedAuthorPhotoUrl == null || _resolvedAuthorPhotoUrl!.isEmpty)
+                      ? Text(_initials(_resolvedAuthorName), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                      : null,
                 ),
               ),
               const SizedBox(width: 10),
@@ -209,14 +189,12 @@ class _PostCardState extends State<_PostCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // LINHA 1: Nome completo, branco
                     Text(
                       _resolvedAuthorName,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14, fontFamily: 'Poppins'),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    // LINHA 2: @username roxo + tempo
                     Row(
                       children: [
                         if (_resolvedUsername.isNotEmpty)
@@ -255,7 +233,7 @@ class _PostCardState extends State<_PostCard> {
               const SizedBox(width: 18),
               _CommentIcon(
                 postId: widget.postId,
-                onTap: () => _openComments(context), // Botão de comentário agora funciona
+                onTap: () => _openComments(context),
               ),
               const SizedBox(width: 18),
               _ActionIcon(onTap: () {}, icon: Icons.share_outlined, label: '0'),
@@ -314,7 +292,6 @@ class _CommentIcon extends StatelessWidget {
   }
 }
 
-// WIDGET DE COMENTÁRIOS RESTAURADO
 class _CommentsSheet extends StatefulWidget {
   final String postId;
   const _CommentsSheet({required this.postId});
@@ -427,29 +404,7 @@ class _CommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primaryPurple,
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: authorPhotoUrl.isNotEmpty
-                ? (authorPhotoUrl.startsWith('assets/')
-                    ? Image.asset(
-                        authorPhotoUrl,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                      )
-                    : Image.network(
-                        authorPhotoUrl,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 14, color: Colors.white),
-                      ))
-                : const Icon(Icons.person, size: 14, color: Colors.white),
-          ),
+          CircleAvatar(radius: 14, backgroundImage: authorPhotoUrl.isNotEmpty ? NetworkImage(authorPhotoUrl) : null),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

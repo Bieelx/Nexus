@@ -111,12 +111,12 @@ class _AlterarEmailPageState extends State<AlterarEmailPage> {
                     _saveEmailChanges();
                   }
                 },
-                child: const Text('Salvar Alterações'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: kText,
                   backgroundColor: kAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: const Text('Salvar Alterações'),
               ),
             ],
           ),

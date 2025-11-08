@@ -112,7 +112,7 @@ class _AlterarNotificacoesPageState extends State<AlterarNotificacoesPage> {
                   _isMessagesEnabled = value;
                 });
               },
-              activeColor: kAccent,
+              activeThumbColor: kAccent,
               activeTrackColor: kAccent.withOpacity(0.6),
               inactiveThumbColor: Colors.grey,
               inactiveTrackColor: Colors.grey.withOpacity(0.4),
@@ -130,7 +130,7 @@ class _AlterarNotificacoesPageState extends State<AlterarNotificacoesPage> {
                   _isProfileUpdatesEnabled = value;
                 });
               },
-              activeColor: kAccent,
+              activeThumbColor: kAccent,
               activeTrackColor: kAccent.withOpacity(0.6),
               inactiveThumbColor: Colors.grey,
               inactiveTrackColor: Colors.grey.withOpacity(0.4),
@@ -148,7 +148,7 @@ class _AlterarNotificacoesPageState extends State<AlterarNotificacoesPage> {
                   _isAlertsEnabled = value;
                 });
               },
-              activeColor: kAccent,
+              activeThumbColor: kAccent,
               activeTrackColor: kAccent.withOpacity(0.6),
               inactiveThumbColor: Colors.grey,
               inactiveTrackColor: Colors.grey.withOpacity(0.4),
@@ -159,12 +159,12 @@ class _AlterarNotificacoesPageState extends State<AlterarNotificacoesPage> {
             // Botão para salvar as alterações
             ElevatedButton(
               onPressed: _saveNotificationSettings,
-              child: const Text('Salvar Alterações'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: kText,
                 backgroundColor: kAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('Salvar Alterações'),
             ),
           ],
         ),
