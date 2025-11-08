@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 
 import '../core/theme/app_colors.dart';
 import '../service/hibp_service.dart';
-import '../widgets/breach_detail_card.dart';
 
 /// Versão melhorada da tela de vazamentos com integração completa HIBP
 class LeakCheckerScreenEnhanced extends StatefulWidget {
@@ -126,32 +125,10 @@ class _LeakCheckerScreenEnhancedState
       });
 
       if (breaches.isEmpty && pastes.isEmpty) {
-        _resultMessage = '✅ O email $email NÃO foi encontrado em vazamentos!';
+        _resultMessage = '✅ Email seguro';
         _showDetails = false;
       } else {
-        // Monta mensagem resumida
-        final breachCount = breaches.length;
-        final pasteCount = pastes.length;
-
-        String message = '⚠️ Email comprometido!\n\n';
-        message +=
-            'Encontrado em $breachCount vazamento${breachCount > 1 ? 's' : ''}';
-
-        if (pasteCount > 0) {
-          message +=
-              ' e $pasteCount paste${pasteCount > 1 ? 's' : ''} público${pasteCount > 1 ? 's' : ''}';
-        }
-
-        // Lista os 3 primeiros vazamentos
-        if (breaches.isNotEmpty) {
-          final topBreaches = breaches.take(3).map((b) => b.title).join(', ');
-          message += '.\n\nPrincipais: $topBreaches';
-          if (breachCount > 3) {
-            message += ' e mais ${breachCount - 3}...';
-          }
-        }
-
-        _resultMessage = message;
+        _resultMessage = '⚠️ Email comprometido';
         _showDetails = true;
         _showHelpToast();
       }
@@ -218,52 +195,24 @@ class _LeakCheckerScreenEnhancedState
 
               const SizedBox(height: 24),
 
-              // Banner de resultado
-              if (_resultMessage.isNotEmpty)
-                _StatusBanner(
-                  resultMessage: _resultMessage,
-                  selectedType: _selectedType,
-                ),
-
-              // Detalhes dos vazamentos
+              // Resultados simplificados
               if (_showDetails && _breaches.isNotEmpty) ...[
                 const SizedBox(height: 24),
 
-                // Card de resumo estatístico
-                BreachSummaryCard(
-                  breaches: _breaches,
-                  pastes: _pastes.isNotEmpty ? _pastes : null,
+                // Card com número de vazamentos EM DESTAQUE
+                _SimpleBreachCountCard(
+                  breachCount: _breaches.length,
+                  pasteCount: _pastes.length,
                 ),
 
                 const SizedBox(height: 24),
 
-                // Título da lista de vazamentos
-                Row(
-                  children: [
-                    const Icon(Icons.list, color: AppColors.primaryPurple),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Detalhes dos Vazamentos (${_breaches.length})',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Lista de vazamentos
-                ..._breaches.map((breach) => BreachDetailCard(breach: breach)),
-
-                // Informações sobre pastes
-                if (_pastes.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  _PastesSection(pastes: _pastes),
-                ],
+                // Lista SIMPLES dos sites onde vazou
+                _SimpleBreachListCard(breaches: _breaches),
+              ] else if (_resultMessage.isNotEmpty) ...[
+                // Mensagem quando NÃO há vazamentos
+                const SizedBox(height: 24),
+                _SafeEmailCard(),
               ],
 
               const SizedBox(height: 32),
@@ -516,6 +465,290 @@ class _PastesSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ================================================================
+// NOVOS WIDGETS SIMPLIFICADOS
+// ================================================================
+
+/// Card com número de vazamentos EM DESTAQUE
+class _SimpleBreachCountCard extends StatelessWidget {
+  final int breachCount;
+  final int pasteCount;
+
+  const _SimpleBreachCountCard({
+    required this.breachCount,
+    required this.pasteCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFD64344),
+            const Color(0xFF834748),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD07274), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD64344).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Ícone de alerta
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.white,
+              size: 48,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Número de vazamentos - BEM GRANDE
+          Text(
+            breachCount.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 72,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+              height: 1,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Texto explicativo
+          Text(
+            breachCount == 1 ? 'Vazamento Encontrado' : 'Vazamentos Encontrados',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+            ),
+          ),
+
+          // Pastes (se houver)
+          if (pasteCount > 0) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '+ $pasteCount paste${pasteCount > 1 ? 's' : ''} público${pasteCount > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Lista SIMPLES dos sites onde vazou
+class _SimpleBreachListCard extends StatelessWidget {
+  final List<BreachData> breaches;
+
+  const _SimpleBreachListCard({required this.breaches});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2B3242),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x334D5A7A)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título
+          const Row(
+            children: [
+              Icon(Icons.business, color: AppColors.primaryPurple, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Onde seu email foi vazado:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Lista simples de sites
+          ...breaches.map((breach) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    // Bullet point
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD64344),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Nome do site
+                    Expanded(
+                      child: Text(
+                        breach.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+
+                    // Ano
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        breach.year.toString(),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                    // Badge verificado (se for)
+                    if (breach.isVerified) ...[
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.verified,
+                        color: Colors.green,
+                        size: 16,
+                      ),
+                    ],
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+/// Card quando email está SEGURO
+class _SafeEmailCard extends StatelessWidget {
+  const _SafeEmailCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF3251A3),
+            const Color(0xFF2A4080),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF678EE6), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3251A3).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Ícone de sucesso
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle_outline,
+              color: Colors.white,
+              size: 48,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Mensagem
+          const Text(
+            'Email Seguro!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            'Seu email não foi encontrado em nenhum vazamento conhecido.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 16,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
