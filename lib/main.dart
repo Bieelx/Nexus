@@ -14,6 +14,7 @@ import 'core/firebase_options.dart';
 import 'widgets/navbar.dart';
 import 'widgets/gradient_background.dart';
 import 'Screens/Subscreens/lesson_screen.dart';
+import '/service/gemini_key_service.dart';
 
 Future<void> main() async {
   // Garante que o Flutter e os plugins estejam prontos
@@ -40,7 +41,7 @@ Future<void> main() async {
 
   // Habilita persistência offline do Firestore
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-
+  await GeminiKeyService.instance.init();
   // Inicializa o app
   runApp(
     ChangeNotifierProvider(

@@ -47,6 +47,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   vector_math: ^2.1.4
   intl: ^0.20.2
+  flutter_launcher_icons: ^0.13.1
 
   # --- Env vars ---
   flutter_dotenv: ^6.0.0
@@ -56,6 +57,7 @@ dependencies:
   flutter_markdown: ^0.7.1
   langchain: ^0.7.9
   langchain_google: ^0.6.5+2
+  firebase_remote_config: ^6.1.1
 
 
 dev_dependencies:
@@ -73,13 +75,13 @@ flutter:
     - assets/Lua/Lua-Curiosa.png
     - assets/Lua/Lua-muito-surpresa.png
     - assets/icons/newsAI.svg
-    - assets/pdfs/seguranca-digital/
     - assets/Lua/icones-perfil/icone1.png
     - assets/Lua/icones-perfil/icone2.png
     - assets/Lua/icones-perfil/icone3.png
     - assets/Lua/icones-perfil/icone4.png
     - assets/Lua/icones-perfil/icone5.png
     - assets/Lua/icones-perfil/icone6.png
+    - assets/icon/icon.png
   fonts:
     - family: Poppins
       fonts:
@@ -90,3 +92,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins/Poppins-Bold.ttf
           weight: 700
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21

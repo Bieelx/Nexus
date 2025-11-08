@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "firebase functions:secrets:set GEMINI_KEYS": "sec4u-6b6f8",
+    "default": "sec4u-6b6f8"
+  },
+  "targets": {},
+  "etags": {}
+}
