@@ -16,7 +16,11 @@ packages:
       sha256: "8a1f5f3020ef2a74fb93f7ab3ef127a8feea33a7a2276279113660784ee7516a"
       url: "https://pub.dev"
     source: hosted
+<<<<<<< HEAD
     version: "1.3.64"
+=======
+    version: "1.3.62"
+>>>>>>> 2e64cf88dd3dd9a6d606049b803ccffb932dcd7d
   archive:
     dependency: transitive
     description:
@@ -455,7 +459,11 @@ packages:
     source: hosted
     version: "0.6.0"
   flutter_launcher_icons:
+<<<<<<< HEAD
     dependency: "direct main"
+=======
+    dependency: "direct dev"
+>>>>>>> 2e64cf88dd3dd9a6d606049b803ccffb932dcd7d
     description:
       name: flutter_launcher_icons
       sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
