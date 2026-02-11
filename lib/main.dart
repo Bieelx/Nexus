@@ -10,7 +10,7 @@ import 'Screens/leak_check_screen_enhanced.dart';
 import 'Screens/boards_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'core/firebase_options.dart';
+import 'firebase_options.dart';
 import 'widgets/navbar.dart';
 import 'widgets/gradient_background.dart';
 import 'Screens/Subscreens/lesson_screen.dart';
@@ -20,8 +20,8 @@ Future<void> main() async {
   // Garante que o Flutter e os plugins estejam prontos
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Carrega variáveis de ambiente
-  await dotenv.load();
+  // Carrega variáveis de ambiente (.env como asset, funciona em todas as plataformas)
+  await dotenv.load(fileName: ".env");
 
   // Inicialização segura do Firebase
   try {

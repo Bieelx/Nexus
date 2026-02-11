@@ -37,10 +37,11 @@ class _AlterarNotificacoesPageState extends State<AlterarNotificacoesPage> {
         .doc(user.uid)
         .get();
     if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>? ?? {};
       setState(() {
-        _isMessagesEnabled = userDoc['isMessagesEnabled'] ?? true;
-        _isProfileUpdatesEnabled = userDoc['isProfileUpdatesEnabled'] ?? true;
-        _isAlertsEnabled = userDoc['isAlertsEnabled'] ?? true;
+        _isMessagesEnabled = data['isMessagesEnabled'] ?? true;
+        _isProfileUpdatesEnabled = data['isProfileUpdatesEnabled'] ?? true;
+        _isAlertsEnabled = data['isAlertsEnabled'] ?? true;
       });
     }
   }

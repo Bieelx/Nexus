@@ -31,8 +31,9 @@ class _AlterarPrivacidadePageState extends State<AlterarPrivacidadePage> {
 
     final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
     if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>? ?? {};
       setState(() {
-        _isProfilePublic = userDoc['isProfilePublic'] ?? false;
+        _isProfilePublic = data['isProfilePublic'] ?? false;
       });
     }
   }

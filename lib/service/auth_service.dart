@@ -1,14 +1,17 @@
 import 'package:nexus_app/core/auth_exception.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart'; // Import do Google Sign-In
+import 'package:google_sign_in/google_sign_in.dart';
 import 'security_event_service.dart';
 
 class AuthService with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(); // Instância do Google Sign-In
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? '480594485086-i5jvje51qbdjtn0v3hip2c73taaq1hvn.apps.googleusercontent.com' : null,
+  );
 
   User? usuario;
   bool isLoading = true;
@@ -18,8 +21,11 @@ class AuthService with ChangeNotifier {
   }
 
   void _authCheck() {
-    _auth.authStateChanges().listen((User? user) {
+    _auth.authStateChanges().listen((User? user) async {
       usuario = user;
+      if (user != null) {
+        await _ensureUserDocument(user);
+      }
       isLoading = false;
       notifyListeners();
     });
@@ -75,8 +81,10 @@ class AuthService with ChangeNotifier {
 
   Future<void> login(String email, String senha) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: senha);
+      final cred = await _auth.signInWithEmailAndPassword(email: email, password: senha);
       await SecurityEventService.logLoginAttempt(email: email, success: true);
+      // Garante que o documento do usuário exista no Firestore
+      await _ensureUserDocument(cred.user);
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') errorMessage = 'Email não encontrado. Cadastre-se.';
@@ -85,6 +93,33 @@ class AuthService with ChangeNotifier {
       
       await SecurityEventService.logLoginAttempt(email: email, success: false, errorMessage: errorMessage);
       throw AuthException(errorMessage);
+    }
+  }
+
+  /// Cria o documento do usuário no Firestore se ele não existir
+  Future<void> _ensureUserDocument(User? user) async {
+    if (user == null) return;
+    try {
+      final docRef = _firestore.collection('users').doc(user.uid);
+      final doc = await docRef.get();
+      if (!doc.exists) {
+        final email = user.email ?? '';
+        final nome = user.displayName ?? email.split('@').first;
+        print('📝 Criando documento do usuário no Firestore para: $email');
+        await docRef.set({
+          'nome': nome,
+          'sobrenome': '',
+          'username': email.split('@').first.toLowerCase(),
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        print('✅ Documento do usuário criado com sucesso.');
+      } else {
+        final data = doc.data();
+        print('✅ Documento do usuário já existe. nome: ${data?['nome']}');
+      }
+    } catch (e) {
+      print('❌ Erro ao garantir documento do usuário: $e');
     }
   }
 

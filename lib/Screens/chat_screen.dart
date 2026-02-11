@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -127,8 +126,7 @@ class ChatService {
     required String request,
     required bool hasLinks,
     String? description,
-    File? image,
-    Uint8List? imageBytes, // Para web
+    Uint8List? imageBytes,
   }) async {
     String prompt = """
 Analise esta possível tentativa de golpe...
@@ -138,10 +136,10 @@ Seja OBJETIVA, CLARA e use PORTUGUÊS BRASILEIRO.
 
     try {
       Map<String, dynamic> requestBody;
-      final bool hasImage = image != null || imageBytes != null;
+      final bool hasImage = imageBytes != null;
 
       if (hasImage) {
-        final Uint8List bytes = imageBytes ?? await image!.readAsBytes();
+        final Uint8List bytes = imageBytes;
         final base64Image = base64Encode(bytes);
         requestBody = {
           "system_instruction": {"parts": [{"text": _systemPrompt}]},
@@ -671,8 +669,7 @@ class _ChatScreenState extends State<ChatScreen>
             request: result['request'],
             hasLinks: result['hasLinks'],
             description: result['description'],
-            image: result['image'],
-            imageBytes: result['imageBytes'], // Para web
+            imageBytes: result['imageBytes'],
           );
 
           if (mounted) {
@@ -960,8 +957,7 @@ class _ScamAnalysisSheetState extends State<ScamAnalysisSheet> {
   String _request = '';
   bool _hasLinks = false;
   String _description = '';
-  File? _image;
-  Uint8List? _imageBytes; // Para web
+  Uint8List? _imageBytes;
   final _descriptionController = TextEditingController();
   final _imagePicker = ImagePicker();
 
@@ -980,20 +976,10 @@ class _ScamAnalysisSheetState extends State<ScamAnalysisSheet> {
     );
 
     if (pickedFile != null) {
-      if (kIsWeb) {
-        // Para web, lê os bytes
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _imageBytes = bytes;
-          _image = null;
-        });
-      } else {
-        // Para mobile/desktop
-        setState(() {
-          _image = File(pickedFile.path);
-          _imageBytes = null;
-        });
-      }
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+      });
     }
   }
 
@@ -1015,8 +1001,7 @@ class _ScamAnalysisSheetState extends State<ScamAnalysisSheet> {
       'request': _request,
       'hasLinks': _hasLinks,
       'description': _descriptionController.text,
-      'image': _image,
-      'imageBytes': _imageBytes, // Para web
+      'imageBytes': _imageBytes,
     });
 
     Navigator.pop(context);
@@ -1163,7 +1148,7 @@ class _ScamAnalysisSheetState extends State<ScamAnalysisSheet> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xB27884C4)),
                   ),
-                  child: (_image == null && _imageBytes == null)
+                  child: _imageBytes == null
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
@@ -1179,18 +1164,13 @@ class _ScamAnalysisSheetState extends State<ScamAnalysisSheet> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: kIsWeb && _imageBytes != null
-                                  ? Image.memory(_imageBytes!, width: double.infinity, height: 120, fit: BoxFit.cover)
-                                  : _image != null
-                                      ? Image.file(_image!, width: double.infinity, height: 120, fit: BoxFit.cover)
-                                      : const SizedBox(),
+                              child: Image.memory(_imageBytes!, width: double.infinity, height: 120, fit: BoxFit.cover),
                             ),
                             Positioned(
                               top: 8,
                               right: 8,
                               child: GestureDetector(
                                 onTap: () => setState(() {
-                                  _image = null;
                                   _imageBytes = null;
                                 }),
                                 child: Container(

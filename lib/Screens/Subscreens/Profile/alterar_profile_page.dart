@@ -52,10 +52,11 @@ class _AlterarProfilePageState extends State<AlterarProfilePage> {
         .doc(user.uid)
         .get();
     if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>? ?? {};
       setState(() {
-        _nameController.text = userDoc['displayName'] ?? 'Nome Padrão';
-        _roleController.text = userDoc['tag'] ?? 'Cargo Padrão';
-        _aboutMeController.text = userDoc['aboutMe'] ?? 'Descrição Padrão';
+        _nameController.text = data['nome'] ?? '';
+        _roleController.text = data['tag'] ?? '';
+        _aboutMeController.text = data['aboutMe'] ?? '';
       });
     }
   }
@@ -67,7 +68,7 @@ class _AlterarProfilePageState extends State<AlterarProfilePage> {
 
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'displayName': _nameController.text,
+        'nome': _nameController.text,
         'tag': _roleController.text,
         'aboutMe': _aboutMeController.text,
         'updatedAt': FieldValue.serverTimestamp(),

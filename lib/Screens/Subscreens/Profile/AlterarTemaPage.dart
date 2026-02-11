@@ -34,8 +34,9 @@ class _AlterarTemaPageState extends State<AlterarTemaPage> {
         .doc(user.uid)
         .get();
     if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>? ?? {};
       setState(() {
-        _isDarkMode = userDoc['isDarkMode'] ?? false;
+        _isDarkMode = data['isDarkMode'] ?? false;
       });
     }
   }

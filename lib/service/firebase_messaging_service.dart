@@ -1,11 +1,18 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'dart:io';
 
 class FirebaseMessagingService {
-  static final _localNotifications = FlutterLocalNotificationsPlugin();
+  static FlutterLocalNotificationsPlugin? _localNotifications;
 
   static Future<void> initialize() async {
+    // Notificações push e locais não são suportadas na web
+    if (kIsWeb) {
+      print('⚠️ FirebaseMessagingService: Push notifications não suportadas na web.');
+      return;
+    }
+
+    _localNotifications = FlutterLocalNotificationsPlugin();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     // Configurações do plugin de notificações locais
@@ -17,17 +24,14 @@ class FirebaseMessagingService {
       iOS: darwin,
       macOS: darwin,
     );
-    await _localNotifications.initialize(settings);
+    await _localNotifications!.initialize(settings);
 
-    // Só executa no iOS e Android
-    if (!Platform.isMacOS) {
-      // Solicita permissão para notificações (necessário no iOS)
-      await messaging.requestPermission();
+    // Solicita permissão para notificações (necessário no iOS)
+    await messaging.requestPermission();
 
-      // Obtenha o token do dispositivo (use para testes no Firebase Console)
-      String? token = await messaging.getToken();
-      print('FCM Token: $token');
-    }
+    // Obtenha o token do dispositivo (use para testes no Firebase Console)
+    String? token = await messaging.getToken();
+    print('FCM Token: $token');
 
     // Escute mensagens recebidas em foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -40,7 +44,9 @@ class FirebaseMessagingService {
   }
 
   static void showNotification(String title, String body) {
-    _localNotifications.show(
+    if (kIsWeb || _localNotifications == null) return;
+
+    _localNotifications!.show(
       0,
       title,
       body,

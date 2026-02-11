@@ -42,7 +42,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCh5y_PpoWuvdUEN3XI9ZBq_dGqkhIpHIQ',
-    appId: '1:480594485086:android:26fedecca64e684d8c39cf',
+    appId: '1:480594485086:android:892b4265b62c3e358c39cf',
     messagingSenderId: '480594485086',
     projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4u-6b6f8.firebasestorage.app',
@@ -54,6 +54,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '480594485086',
     projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4u-6b6f8.firebasestorage.app',
+    androidClientId: '480594485086-ae16a25v552aee49c5v0phvqm10rpqbl.apps.googleusercontent.com',
+    iosClientId: '480594485086-ldgp5k5ejr8uhfqr621i2562107c95ao.apps.googleusercontent.com',
     iosBundleId: 'com.sec4you.securityconnect',
   );
 
@@ -63,6 +65,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '480594485086',
     projectId: 'sec4u-6b6f8',
     storageBucket: 'sec4u-6b6f8.firebasestorage.app',
+    androidClientId: '480594485086-ae16a25v552aee49c5v0phvqm10rpqbl.apps.googleusercontent.com',
+    iosClientId: '480594485086-ldgp5k5ejr8uhfqr621i2562107c95ao.apps.googleusercontent.com',
     iosBundleId: 'com.sec4you.securityconnect',
   );
 

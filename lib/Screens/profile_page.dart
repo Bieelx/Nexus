@@ -42,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   StreamSubscription? _userDocSub;
   Map<String, dynamic> _userData = {};
+  bool _loaded = false;
 
   @override
   void initState() {
@@ -57,8 +58,13 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
         .doc(_profileUid)
         .snapshots()
         .listen((doc) {
-      if (doc.exists && mounted) {
-        setState(() => _userData = doc.data()!);
+      if (mounted) {
+        setState(() {
+          _loaded = true;
+          if (doc.exists) {
+            _userData = doc.data()!;
+          }
+        });
       }
     });
   }
@@ -72,11 +78,40 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    if (_userData.isEmpty) {
+    if (!_loaded) {
       return Scaffold(
         body: Container(
           decoration: const BoxDecoration(gradient: LinearGradient(colors: kBgGradient)),
           child: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (_userData.isEmpty) {
+      // Documento do usuário não existe no Firestore
+      final user = FirebaseAuth.instance.currentUser;
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: LinearGradient(colors: kBgGradient, begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildTopBar(context),
+                const Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Text(
+                        'Perfil ainda não configurado.\nComplete seu cadastro para visualizar.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: kAccentLight, fontSize: 16, fontFamily: 'Poppins'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }

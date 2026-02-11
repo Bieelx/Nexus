@@ -34,8 +34,9 @@ class _AlterarIdiomaPageState extends State<AlterarIdiomaPage> {
         .doc(user.uid)
         .get();
     if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>? ?? {};
       setState(() {
-        _selectedLanguage = userDoc['selectedLanguage'] ?? 'pt';
+        _selectedLanguage = data['selectedLanguage'] ?? 'pt';
       });
     }
   }
